@@ -6,39 +6,39 @@ import 'package:archive/archive.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:xml/xml.dart';
-import 'src/web_helper/client_save_excel.dart'
-    if (dart.library.html) 'src/web_helper/web_save_excel_browser.dart'
+import 'src/platform/save_stub.dart'
+    if (dart.library.html) 'src/platform/save_web.dart'
     as helper;
 
-/// main directory
-part 'src/excel.dart';
+/// Core
+part 'src/core/excel.dart';
+part 'src/core/config.dart';
 
-/// sharedStrings
-part 'src/sharedStrings/shared_strings.dart';
-
-/// Number Format
-part 'src/number_format/num_format.dart';
-
-/// Utilities
-part 'src/utilities/span.dart';
-part 'src/utilities/fast_list.dart';
-part 'src/utilities/utility.dart';
-part 'src/utilities/constants.dart';
-part 'src/utilities/enum.dart';
-part 'src/utilities/archive.dart';
-part 'src/utilities/colors.dart';
-
-/// Save
-part 'src/save/save_file.dart';
-part 'src/save/self_correct_span.dart';
-part 'src/parser/parse.dart';
+/// Models
+part 'src/models/cell_value.dart';
+part 'src/models/cell_data.dart';
+part 'src/models/cell_index.dart';
+part 'src/models/cell_style.dart';
+part 'src/models/font.dart';
+part 'src/models/border.dart';
+part 'src/models/header_footer.dart';
+part 'src/models/color.dart';
+part 'src/models/enums.dart';
+part 'src/models/span.dart';
+part 'src/models/shared_string.dart';
+part 'src/models/num_format.dart';
 
 /// Sheet
 part 'src/sheet/sheet.dart';
-part 'src/sheet/font_family.dart';
-part 'src/sheet/data_model.dart';
-part 'src/sheet/cell_index.dart';
-part 'src/sheet/cell_style.dart';
-part 'src/sheet/font_style.dart';
-part 'src/sheet/header_footer.dart';
-part 'src/sheet/border_style.dart';
+
+/// Reader
+part 'src/reader/excel_parser.dart';
+
+/// Writer
+part 'src/writer/excel_writer.dart';
+part 'src/writer/span_corrector.dart';
+
+/// Utils
+part 'src/utils/archive_utils.dart';
+part 'src/utils/cell_utils.dart';
+part 'src/utils/fast_list.dart';
