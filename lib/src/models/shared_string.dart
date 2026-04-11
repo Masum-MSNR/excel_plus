@@ -1,16 +1,17 @@
 part of '../../excel_plus.dart';
 
 class _SharedStringsMaintainer {
-  final Map<SharedString, _IndexingHolder> _map =
-      <SharedString, _IndexingHolder>{};
-  final Map<String, SharedString> _mapString = <String, SharedString>{};
-  final List<SharedString> _list = <SharedString>[];
-  int _index = 0;
+  /// Ordered list: index → SharedString + reference count.
+  final List<_SharedStringEntry> _entries = [];
+
+  /// Reverse lookup: string value → index in [_entries].
+  final Map<String, int> _stringIndex = {};
 
   _SharedStringsMaintainer._();
 
   SharedString? tryFind(String val) {
-    return _mapString[val];
+    final index = _stringIndex[val];
+    return index != null ? _entries[index].node : null;
   }
 
   SharedString addFromString(String val) {
@@ -25,39 +26,45 @@ class _SharedStringsMaintainer {
   }
 
   void add(SharedString val, String key) {
-    _map[val]?.increaseCount();
-    _map.putIfAbsent(val, () {
-      _mapString[key] = val;
-      _list.add(val);
-      return _IndexingHolder(_index++);
-    });
+    final existingIndex = _stringIndex[key];
+    if (existingIndex != null) {
+      _entries[existingIndex].increaseCount();
+    } else {
+      _stringIndex[key] = _entries.length;
+      _entries.add(_SharedStringEntry(val));
+    }
   }
 
   int indexOf(SharedString val) {
-    return _map[val] != null ? _map[val]!.index : -1;
+    return _stringIndex[val.stringValue] ?? -1;
   }
 
   SharedString? value(int i) {
-    if (i < _list.length) {
-      return _list[i];
+    if (i < _entries.length) {
+      return _entries[i].node;
     } else {
       return null;
     }
   }
 
+  /// Iterates all entries with their reference counts (for writer).
+  void forEach(void Function(SharedString node, int count) fn) {
+    for (final entry in _entries) {
+      fn(entry.node, entry.count);
+    }
+  }
+
   void clear() {
-    _index = 0;
-    _list.clear();
-    _map.clear();
-    _mapString.clear();
+    _entries.clear();
+    _stringIndex.clear();
   }
 }
 
-class _IndexingHolder {
-  final int index;
+class _SharedStringEntry {
+  final SharedString node;
   int count;
 
-  _IndexingHolder(this.index, [int _count = 1]) : count = _count;
+  _SharedStringEntry(this.node) : count = 1;
 
   void increaseCount() {
     count += 1;

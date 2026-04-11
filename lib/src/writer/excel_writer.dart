@@ -310,11 +310,11 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
 
     shareString.children.clear();
 
-    _excel._sharedStrings._map.forEach((string, ss) {
+    _excel._sharedStrings.forEach((sharedString, refCount) {
       uniqueCount += 1;
-      count += ss.count;
+      count += refCount;
 
-      shareString.children.add(string.node);
+      shareString.children.add(sharedString.node);
     });
 
     for (var value in [
