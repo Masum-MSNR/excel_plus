@@ -131,6 +131,10 @@ abstract class _ParserBase {
     document.findAllElements('si').forEach((node) {
       _parseSharedString(node);
     });
+
+    // Free DOM children — values are cached in SharedString objects.
+    document.findAllElements('sst').first.children.clear();
+    _excel._sharedStrings.dropNodes();
   }
 
   void _parseSharedString(XmlElement node) {

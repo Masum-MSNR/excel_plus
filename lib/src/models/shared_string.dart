@@ -15,12 +15,7 @@ class _SharedStringsMaintainer {
   }
 
   SharedString addFromString(String val) {
-    final newSharedString = SharedString(
-        node: XmlElement(XmlName('si'), [], [
-      XmlElement(XmlName('t'),
-          [XmlAttribute(XmlName("space", "xml"), "preserve")], [XmlText(val)]),
-    ]));
-
+    final newSharedString = SharedString._fromText(val);
     add(newSharedString, val);
     return newSharedString;
   }
@@ -58,6 +53,13 @@ class _SharedStringsMaintainer {
     _entries.clear();
     _stringIndex.clear();
   }
+
+  /// Drops XmlElement references from simple (non-rich-text) SharedStrings.
+  void dropNodes() {
+    for (final entry in _entries) {
+      entry.node.dropNode();
+    }
+  }
 }
 
 class _SharedStringEntry {
@@ -72,19 +74,55 @@ class _SharedStringEntry {
 }
 
 class SharedString {
-  final XmlElement node;
-  final int _hashCode;
+  XmlElement? _node;
+  final String _cachedValue;
+  final bool _isRichText;
+  late final int _hashCode = _cachedValue.hashCode;
 
-  SharedString({required this.node}) : _hashCode = node.toString().hashCode;
+  SharedString({required XmlElement node})
+      : _node = node,
+        _cachedValue = _extractStringValue(node),
+        _isRichText = node.childElements.any((e) => e.localName == 'r');
+
+  SharedString._fromText(String value)
+      : _node = null,
+        _cachedValue = value,
+        _isRichText = false;
 
   @override
   String toString() {
     assert(false,
         'prefer stringValue over SharedString.toString() in development');
-    return stringValue;
+    return _cachedValue;
+  }
+
+  /// Drops the retained XmlElement for simple (non-rich-text) strings.
+  void dropNode() {
+    if (!_isRichText) _node = null;
+  }
+
+  /// Produces XML string for this shared string without DOM allocation.
+  String toXmlString() {
+    if (_isRichText && _node != null) {
+      return _node!.toString();
+    }
+    return '<si><t xml:space="preserve">${_escapeXml(_cachedValue)}</t></si>';
+  }
+
+  XmlElement get node {
+    _node ??= XmlElement(XmlName('si'), [], [
+      XmlElement(XmlName('t'),
+          [XmlAttribute(XmlName("space", "xml"), "preserve")],
+          [XmlText(_cachedValue)]),
+    ]);
+    return _node!;
   }
 
   TextSpan get textSpan {
+    if (_node == null) {
+      return TextSpan(text: _cachedValue);
+    }
+
     bool getBool(XmlElement element) {
       return bool.tryParse(element.getAttribute('val') ?? '') ?? true;
     }
@@ -169,16 +207,7 @@ class SharedString {
     return TextSpan(text: text, children: children);
   }
 
-  String get stringValue {
-    var buffer = StringBuffer();
-    node.findAllElements('t').forEach((child) {
-      if (child.parentElement == null ||
-          child.parentElement!.name.local != 'rPh') {
-        buffer.write(Parser._parseValue(child));
-      }
-    });
-    return buffer.toString();
-  }
+  String get stringValue => _cachedValue;
 
   @override
   int get hashCode => _hashCode;
@@ -191,7 +220,27 @@ class SharedString {
   }
 
   bool matches(String value) {
-    return value.isNotEmpty && value == stringValue;
+    return value.isNotEmpty && value == _cachedValue;
+  }
+
+  static String _extractStringValue(XmlElement node) {
+    var buffer = StringBuffer();
+    node.findAllElements('t').forEach((child) {
+      if (child.parentElement == null ||
+          child.parentElement!.name.local != 'rPh') {
+        buffer.write(Parser._parseValue(child));
+      }
+    });
+    return buffer.toString();
+  }
+
+  static String _escapeXml(String input) {
+    return input
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;');
   }
 }
 

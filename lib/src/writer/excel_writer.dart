@@ -277,30 +277,23 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
     var uniqueCount = 0;
     var count = 0;
 
-    XmlElement shareString = _excel
-        ._xmlFiles['xl/${_excel._sharedStringsTarget}']!
-        .findAllElements('sst')
-        .first;
-
-    shareString.children.clear();
-
+    // Build shared strings XML as string — avoid DOM node allocation.
+    StringBuffer ssBuf = StringBuffer();
     _excel._sharedStrings.forEach((sharedString, refCount) {
       uniqueCount += 1;
       count += refCount;
-
-      shareString.children.add(sharedString.node);
+      ssBuf.write(sharedString.toXmlString());
     });
 
-    for (var value in [
-      ['count', '$count'],
-      ['uniqueCount', '$uniqueCount']
-    ]) {
-      if (shareString.getAttributeNode(value[0]) == null) {
-        shareString.attributes.add(XmlAttribute(XmlName(value[0]), value[1]));
-      } else {
-        shareString.getAttributeNode(value[0])!.value = value[1];
-      }
-    }
+    String ssXml =
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
+        '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"'
+        ' count="$count" uniqueCount="$uniqueCount">'
+        '$ssBuf</sst>';
+
+    var ssKey = 'xl/${_excel._sharedStringsTarget}';
+    var bytes = utf8.encode(ssXml);
+    _archiveFiles[ssKey] = ArchiveFile(ssKey, bytes.length, bytes);
   }
 
   /// Writing cell contained text into the excel sheet files.
