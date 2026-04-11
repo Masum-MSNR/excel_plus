@@ -12,18 +12,12 @@ Archive _cloneArchive(
           file.name.toLowerCase() == excludedFile.toLowerCase()) {
         continue;
       }
-      ArchiveFile copy;
       if (archiveFiles.containsKey(file.name)) {
-        copy = archiveFiles[file.name]!;
+        clone.addFile(archiveFiles[file.name]!);
       } else {
-        var content = file.content;
-        var compression = _noCompression.contains(file.name)
-            ? CompressionType.none
-            : CompressionType.deflate;
-        copy = ArchiveFile(file.name, content.length, content)
-          ..compression = compression;
+        // Reuse original ArchiveFile reference — no copy needed
+        clone.addFile(file);
       }
-      clone.addFile(copy);
     }
   }
   return clone;
