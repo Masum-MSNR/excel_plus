@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 class _SharedStringsMaintainer {
   final Map<SharedString, _IndexingHolder> _map =
@@ -60,7 +60,7 @@ class _IndexingHolder {
   _IndexingHolder(this.index, [int _count = 1]) : count = _count;
 
   void increaseCount() {
-    this.count += 1;
+    count += 1;
   }
 }
 
@@ -145,7 +145,7 @@ class SharedString {
 
               /// Text
               case 't': //18.4.12 t (Text)
-                if (children == null) children = [];
+                children ??= [];
                 children.add(TextSpan(text: runChild.innerText, style: style));
                 break;
             }

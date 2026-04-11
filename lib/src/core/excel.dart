@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 Excel _newExcel(Archive archive) {
   // Lookup at file format
@@ -44,7 +44,7 @@ class Excel {
   final NumFormatMaintainer _numFormats = NumFormatMaintainer();
   List<_BorderSet> _borderSetList = [];
 
-  _SharedStringsMaintainer _sharedStrings = _SharedStringsMaintainer._();
+  final _SharedStringsMaintainer _sharedStrings = _SharedStringsMaintainer._();
 
   String _stylesTarget = '';
   String _sharedStringsTarget = '';
@@ -52,7 +52,7 @@ class Excel {
     if (_sharedStringsTarget.isNotEmpty && _sharedStringsTarget[0] == "/") {
       return _sharedStringsTarget.substring(1);
     }
-    return "xl/${_sharedStringsTarget}";
+    return "xl/$_sharedStringsTarget";
   }
 
   String? _defaultSheet;
@@ -86,10 +86,10 @@ class Excel {
   ///It will return `tables` as map in order to mimic the previous versions reading the data.
   ///
   Map<String, Sheet> get tables {
-    if (this._sheetMap.isEmpty) {
+    if (_sheetMap.isEmpty) {
       _damagedExcel(text: "Corrupted Excel file.");
     }
-    return Map<String, Sheet>.from(this._sheetMap);
+    return Map<String, Sheet>.from(_sheetMap);
   }
 
   ///
@@ -116,7 +116,7 @@ class Excel {
   ///
   ///Newly created sheet with name = `sheet` will have seperate reference and will not be linked to sheetObject.
   ///
-  operator []=(String sheet, Sheet sheetObject) {
+  void operator []=(String sheet, Sheet sheetObject) {
     _availSheet(sheet);
 
     _sheetMap[sheet] = Sheet._clone(this, sheet, sheetObject);
@@ -234,23 +234,23 @@ class Excel {
     /// remove from `_xmlSheetId`.
     if (_xmlSheetId[sheet] != null) {
       String sheetId1 =
-              "worksheets" + _xmlSheetId[sheet]!.split('worksheets')[1],
+              "worksheets${_xmlSheetId[sheet]!.split('worksheets')[1]}",
           sheetId2 = _xmlSheetId[sheet]!;
 
       _xmlFiles['xl/_rels/workbook.xml.rels']
           ?.rootElement
           .children
-          .removeWhere((_sheetName) {
-        return _sheetName.getAttribute('Target') != null &&
-            _sheetName.getAttribute('Target') == sheetId1;
+          .removeWhere((sheetName) {
+        return sheetName.getAttribute('Target') != null &&
+            sheetName.getAttribute('Target') == sheetId1;
       });
 
       _xmlFiles['[Content_Types].xml']
           ?.rootElement
           .children
-          .removeWhere((_sheetName) {
-        return _sheetName.getAttribute('PartName') != null &&
-            _sheetName.getAttribute('PartName') == '/' + sheetId2;
+          .removeWhere((sheetName) {
+        return sheetName.getAttribute('PartName') != null &&
+            sheetName.getAttribute('PartName') == '/$sheetId2';
       });
 
       ///
@@ -354,13 +354,13 @@ class Excel {
   String? _getDefaultSheet() {
     Iterable<XmlElement>? elements =
         _xmlFiles['xl/workbook.xml']?.findAllElements('sheet');
-    XmlElement? _sheet;
+    XmlElement? sheet;
     if (elements?.isNotEmpty ?? false) {
-      _sheet = elements?.first;
+      sheet = elements?.first;
     }
 
-    if (_sheet != null) {
-      var defaultSheet = _sheet.getAttribute('name');
+    if (sheet != null) {
+      var defaultSheet = sheet.getAttribute('name');
       if (defaultSheet != null) {
         return defaultSheet;
       } else {
@@ -461,7 +461,7 @@ class Excel {
       return;
     }
     _availSheet(sheet);
-    _sheetMap['$sheet']!.insertRowIterables(row, rowIndex,
+    _sheetMap[sheet]!.insertRowIterables(row, rowIndex,
         startingColumn: startingColumn,
         overwriteMergedCells: overwriteMergedCells);
   }
@@ -495,7 +495,7 @@ class Excel {
     int replaceCount = 0;
     if (_sheetMap[sheet] == null) return replaceCount;
 
-    _sheetMap['$sheet']!.findAndReplace(
+    _sheetMap[sheet]!.findAndReplace(
       source,
       target,
       first: first,

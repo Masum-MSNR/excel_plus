@@ -1,20 +1,20 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 Archive _cloneArchive(
   Archive archive,
-  Map<String, ArchiveFile> _archiveFiles, {
+  Map<String, ArchiveFile> archiveFiles, {
   String? excludedFile,
 }) {
   var clone = Archive();
-  archive.files.forEach((file) {
+  for (var file in archive.files) {
     if (file.isFile) {
       if (excludedFile != null &&
           file.name.toLowerCase() == excludedFile.toLowerCase()) {
-        return;
+        continue;
       }
       ArchiveFile copy;
-      if (_archiveFiles.containsKey(file.name)) {
-        copy = _archiveFiles[file.name]!;
+      if (archiveFiles.containsKey(file.name)) {
+        copy = archiveFiles[file.name]!;
       } else {
         var content = file.content;
         var compression = _noCompression.contains(file.name)
@@ -25,6 +25,6 @@ Archive _cloneArchive(
       }
       clone.addFile(copy);
     }
-  });
+  }
   return clone;
 }

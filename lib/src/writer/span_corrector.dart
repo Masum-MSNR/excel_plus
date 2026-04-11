@@ -1,12 +1,12 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 ///Self correct the spanning of rows and columns by checking their cross-sectional relationship between if exists.
-_selfCorrectSpanMap(Excel _excel) {
-  _excel._mergeChangeLook.forEach((String key) {
-    if (_excel._sheetMap[key] != null &&
-        _excel._sheetMap[key]!._spanList.isNotEmpty) {
+void _selfCorrectSpanMap(Excel excel) {
+  for (final key in excel._mergeChangeLook) {
+    if (excel._sheetMap[key] != null &&
+        excel._sheetMap[key]!._spanList.isNotEmpty) {
       List<_Span?> spanList =
-          List<_Span?>.from(_excel._sheetMap[key]!._spanList);
+          List<_Span?>.from(excel._sheetMap[key]!._spanList);
 
       for (int i = 0; i < spanList.length; i++) {
         _Span? checkerPos = spanList[i];
@@ -57,8 +57,8 @@ _selfCorrectSpanMap(Excel _excel) {
         );
         spanList[i] = spanObj1;
       }
-      _excel._sheetMap[key]!._spanList = List<_Span?>.from(spanList);
-      _excel._sheetMap[key]!._cleanUpSpanMap();
+      excel._sheetMap[key]!._spanList = List<_Span?>.from(spanList);
+      excel._sheetMap[key]!._cleanUpSpanMap();
     }
-  });
+  }
 }

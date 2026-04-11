@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 // For Spanning the columns and rows
 class _Span extends Equatable {

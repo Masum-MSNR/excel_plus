@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 class CellIndex extends Equatable {
   CellIndex._({required this.columnIndex, required this.rowIndex});
@@ -29,7 +29,7 @@ class CellIndex extends Equatable {
   /// var cellIndex = CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 0 );
   /// var cell = cellIndex.cellId; // A1
   String get cellId {
-    return getCellId(this.columnIndex, this.rowIndex);
+    return getCellId(columnIndex, rowIndex);
   }
 
   final int rowIndex;

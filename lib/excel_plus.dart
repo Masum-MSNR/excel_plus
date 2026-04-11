@@ -1,5 +1,3 @@
-library excel_plus;
-
 import 'dart:convert';
 import 'dart:math';
 import 'package:archive/archive.dart';

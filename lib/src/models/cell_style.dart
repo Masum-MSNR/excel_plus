@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 /// Styling class for cells
 // ignore: must_be_immutable
@@ -86,26 +86,26 @@ class CellStyle extends Equatable {
     NumFormat? numberFormat,
   }) {
     return CellStyle(
-      fontColorHex: fontColorHexVal ?? this._fontColorHex.excelColor,
+      fontColorHex: fontColorHexVal ?? _fontColorHex.excelColor,
       backgroundColorHex:
-          backgroundColorHexVal ?? this._backgroundColorHex.excelColor,
-      fontFamily: fontFamilyVal ?? this._fontFamily,
-      fontScheme: fontSchemeVal ?? this._fontScheme,
-      horizontalAlign: horizontalAlignVal ?? this._horizontalAlign,
-      verticalAlign: verticalAlignVal ?? this._verticalAlign,
-      textWrapping: textWrappingVal ?? this._textWrapping,
-      bold: boldVal ?? this._bold,
-      italic: italicVal ?? this._italic,
-      underline: underlineVal ?? this._underline,
-      fontSize: fontSizeVal ?? this._fontSize,
-      rotation: rotationVal ?? this._rotation,
-      leftBorder: leftBorderVal ?? this._leftBorder,
-      rightBorder: rightBorderVal ?? this._rightBorder,
-      topBorder: topBorderVal ?? this._topBorder,
-      bottomBorder: bottomBorderVal ?? this._bottomBorder,
-      diagonalBorder: diagonalBorderVal ?? this._diagonalBorder,
-      diagonalBorderUp: diagonalBorderUpVal ?? this._diagonalBorderUp,
-      diagonalBorderDown: diagonalBorderDownVal ?? this._diagonalBorderDown,
+          backgroundColorHexVal ?? _backgroundColorHex.excelColor,
+      fontFamily: fontFamilyVal ?? _fontFamily,
+      fontScheme: fontSchemeVal ?? _fontScheme,
+      horizontalAlign: horizontalAlignVal ?? _horizontalAlign,
+      verticalAlign: verticalAlignVal ?? _verticalAlign,
+      textWrapping: textWrappingVal ?? _textWrapping,
+      bold: boldVal ?? _bold,
+      italic: italicVal ?? _italic,
+      underline: underlineVal ?? _underline,
+      fontSize: fontSizeVal ?? _fontSize,
+      rotation: rotationVal ?? _rotation,
+      leftBorder: leftBorderVal ?? _leftBorder,
+      rightBorder: rightBorderVal ?? _rightBorder,
+      topBorder: topBorderVal ?? _topBorder,
+      bottomBorder: bottomBorderVal ?? _bottomBorder,
+      diagonalBorder: diagonalBorderVal ?? _diagonalBorder,
+      diagonalBorderUp: diagonalBorderUpVal ?? _diagonalBorderUp,
+      diagonalBorderDown: diagonalBorderDownVal ?? _diagonalBorderDown,
       numberFormat: numberFormat ?? this.numberFormat,
     );
   }
@@ -202,8 +202,8 @@ class CellStyle extends Equatable {
 
   ///Set Font Size
   ///
-  set fontSize(int? _fs) {
-    _fontSize = _fs;
+  set fontSize(int? fs) {
+    _fontSize = fs;
   }
 
   ///Get Rotation
@@ -214,17 +214,17 @@ class CellStyle extends Equatable {
 
   ///Rotation varies from [90 to -90]
   ///
-  set rotation(int _rotate) {
-    if (_rotate > 90 || _rotate < -90) {
-      _rotate = 0;
+  set rotation(int rotate) {
+    if (rotate > 90 || rotate < -90) {
+      rotate = 0;
     }
-    if (_rotate < 0) {
+    if (rotate < 0) {
       /// The value is from 0 to -90 so now make it absolute and add it to 90
       ///
       /// -(_rotate) + 90
-      _rotate = -(_rotate) + 90;
+      rotate = -(rotate) + 90;
     }
-    _rotation = _rotate;
+    _rotation = rotate;
   }
 
   ///Get `Underline`

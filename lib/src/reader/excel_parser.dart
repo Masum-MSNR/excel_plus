@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 class Parser {
   final Excel _excel;
@@ -237,12 +237,12 @@ class Parser {
   }
 
   // Reading the styles from the excel file.
-  void _parseStyles(String _stylesTarget) {
-    var styles = _excel._archive.findFile('xl/$_stylesTarget');
+  void _parseStyles(String stylesTarget) {
+    var styles = _excel._archive.findFile('xl/$stylesTarget');
     if (styles != null) {
       styles.decompress();
       var document = XmlDocument.parse(utf8.decode(styles.content));
-      _excel._xmlFiles['xl/$_stylesTarget'] = document;
+      _excel._xmlFiles['xl/$stylesTarget'] = document;
 
       _excel._fontStyleList = <_FontStyle>[];
       _excel._patternFill = <String>[];
@@ -344,72 +344,72 @@ class Parser {
           TextWrapping? textWrapping;
           int rotation = 0;
           int fontId = _getFontIndex(node, 'fontId');
-          _FontStyle _fontStyle = _FontStyle();
+          _FontStyle fontStyle = _FontStyle();
 
           /// checking for other font values
           if (fontId < fontList.length) {
             XmlElement font = fontList.elementAt(fontId);
 
             /// Checking for font Size.
-            var _clr = _nodeChildren(font, 'color', attribute: 'rgb');
-            if (_clr != null && !(_clr is bool)) {
-              fontColor = _clr.toString();
+            var clr = _nodeChildren(font, 'color', attribute: 'rgb');
+            if (clr != null && clr is! bool) {
+              fontColor = clr.toString();
             }
 
             /// Checking for font Size.
-            String? _size = _nodeChildren(font, 'sz', attribute: 'val');
-            if (_size != null) {
-              fontSize = double.parse(_size).round();
+            String? size = _nodeChildren(font, 'sz', attribute: 'val');
+            if (size != null) {
+              fontSize = double.parse(size).round();
             }
 
             /// Checking for bold
-            var _bold = _nodeChildren(font, 'b');
-            if (_bold != null && _bold is bool && _bold) {
+            var bold = _nodeChildren(font, 'b');
+            if (bold != null && bold is bool && bold) {
               isBold = true;
             }
 
             /// Checking for italic
-            var _italic = _nodeChildren(font, 'i');
-            if (_italic != null && _italic) {
+            var italic = _nodeChildren(font, 'i');
+            if (italic != null && italic) {
               isItalic = true;
             }
 
             /// Checking for double underline
-            var _underline = _nodeChildren(font, 'u', attribute: 'val');
-            if (_underline != null) {
+            var underline0 = _nodeChildren(font, 'u', attribute: 'val');
+            if (underline0 != null) {
               underline = Underline.Double;
             }
 
             /// Checking for single underline
-            var _singleUnderline = _nodeChildren(font, 'u');
-            if (_singleUnderline != null) {
+            var singleUnderline = _nodeChildren(font, 'u');
+            if (singleUnderline != null) {
               underline = Underline.Single;
             }
 
             /// Checking for font Family
-            var _family = _nodeChildren(font, 'name', attribute: 'val');
-            if (_family != null && _family != true) {
-              fontFamily = _family;
+            var family = _nodeChildren(font, 'name', attribute: 'val');
+            if (family != null && family != true) {
+              fontFamily = family;
             }
 
             /// Checking for font Scheme
-            var _scheme = _nodeChildren(font, 'scheme', attribute: 'val');
-            if (_scheme != null) {
+            var scheme = _nodeChildren(font, 'scheme', attribute: 'val');
+            if (scheme != null) {
               fontScheme =
-                  _scheme == "major" ? FontScheme.Major : FontScheme.Minor;
+                  scheme == "major" ? FontScheme.Major : FontScheme.Minor;
             }
 
-            _fontStyle.isBold = isBold;
-            _fontStyle.isItalic = isItalic;
-            _fontStyle.fontSize = fontSize;
-            _fontStyle.fontFamily = fontFamily;
-            _fontStyle.fontScheme = fontScheme;
-            _fontStyle._fontColorHex = fontColor.excelColor;
+            fontStyle.isBold = isBold;
+            fontStyle.isItalic = isItalic;
+            fontStyle.fontSize = fontSize;
+            fontStyle.fontFamily = fontFamily;
+            fontStyle.fontScheme = fontScheme;
+            fontStyle._fontColorHex = fontColor.excelColor;
           }
 
           /// If `-1` is returned then it indicates that `_fontStyle` is not present in the `_fontStyleList`
-          if (_fontStyleIndex(_excel._fontStyleList, _fontStyle) == -1) {
-            _excel._fontStyleList.add(_fontStyle);
+          if (_fontStyleIndex(_excel._fontStyleList, fontStyle) == -1) {
+            _excel._fontStyleList.add(fontStyle);
           }
 
           int fillId = _getFontIndex(node, 'fillId');
@@ -509,7 +509,7 @@ class Parser {
     return null; // pretending that the node's children is not having specified child.
   }
 
-  int _getFontIndex(var node, String text) {
+  int _getFontIndex(XmlElement node, String text) {
     String? applyFont = node.getAttribute(text)?.trim();
     if (applyFont != null) {
       try {
@@ -527,11 +527,11 @@ class Parser {
     var name = node.getAttribute('name')!;
     var target = _worksheetTargets[node.getAttribute('r:id')];
 
-    if (_excel._sheetMap['$name'] == null) {
-      _excel._sheetMap['$name'] = Sheet._(_excel, '$name');
+    if (_excel._sheetMap[name] == null) {
+      _excel._sheetMap[name] = Sheet._(_excel, name);
     }
 
-    Sheet sheetObject = _excel._sheetMap['$name']!;
+    Sheet sheetObject = _excel._sheetMap[name]!;
 
     var file = _excel._archive.findFile('xl/$target');
     file!.decompress();
@@ -565,7 +565,7 @@ class Parser {
     _normalizeTable(sheetObject);
   }
 
-  _parseRow(XmlElement node, Sheet sheetObject, String name) {
+  void _parseRow(XmlElement node, Sheet sheetObject, String name) {
     var rowIndex = (_getRowNumber(node) ?? -1) - 1;
     if (rowIndex < 0) {
       return;
@@ -664,11 +664,11 @@ class Parser {
   static String _parseValue(XmlElement node) {
     var buffer = StringBuffer();
 
-    node.children.forEach((child) {
+    for (var child in node.children) {
       if (child is XmlText) {
         buffer.write(_normalizeNewLine(child.value));
       }
-    });
+    }
 
     return buffer.toString();
   }
@@ -700,7 +700,7 @@ class Parser {
       throw ArgumentError('');
     } */
 
-    int _sheetId = -1;
+    int sheetId0 = -1;
     List<int> sheetIdList = <int>[];
 
     _excel._xmlFiles['xl/workbook.xml']
@@ -721,19 +721,19 @@ class Parser {
 
     for (int i = 0; i < sheetIdList.length; i++) {
       if ((i + 1) != sheetIdList[i]) {
-        _sheetId = i + 1;
+        sheetId0 = i + 1;
         break;
       }
     }
-    if (_sheetId == -1) {
+    if (sheetId0 == -1) {
       if (sheetIdList.isEmpty) {
-        _sheetId = 1;
+        sheetId0 = 1;
       } else {
-        _sheetId = sheetIdList.length + 1;
+        sheetId0 = sheetIdList.length + 1;
       }
     }
 
-    int sheetNumber = _sheetId;
+    int sheetNumber = sheetId0;
     int ridNumber = _getAvailableRid();
 
     _excel._xmlFiles['xl/_rels/workbook.xml.rels']
@@ -771,11 +771,11 @@ class Parser {
 
     _excel._archive.addFile(ArchiveFile(
         'xl/worksheets/sheet$sheetNumber.xml', content.length, content));
-    var _newSheet =
+    var newSheet0 =
         _excel._archive.findFile('xl/worksheets/sheet$sheetNumber.xml');
 
-    _newSheet!.decompress();
-    var document = XmlDocument.parse(utf8.decode(_newSheet.content));
+    newSheet0!.decompress();
+    var document = XmlDocument.parse(utf8.decode(newSheet0.content));
     _excel._xmlFiles['xl/worksheets/sheet$sheetNumber.xml'] = document;
     _excel._xmlSheetId[newSheet] = 'xl/worksheets/sheet$sheetNumber.xml';
 
@@ -815,7 +815,7 @@ class Parser {
     Iterable<XmlElement> results;
     results = worksheet.findAllElements("sheetFormatPr");
     if (results.isNotEmpty) {
-      results.forEach((element) {
+      for (var element in results) {
         double? defaultColWidth;
         double? defaultRowHeight;
         // default column width
@@ -834,7 +834,7 @@ class Parser {
           sheetObject._defaultColumnWidth = defaultColWidth;
           sheetObject._defaultRowHeight = defaultRowHeight;
         }
-      });
+      }
     }
 
     /* parse custom column height
@@ -845,7 +845,7 @@ class Parser {
     */
     results = worksheet.findAllElements("col");
     if (results.isNotEmpty) {
-      results.forEach((element) {
+      for (var element in results) {
         String? colAttribute =
             element.getAttribute("min"); // i think min refers to the column
         String? widthAttribute = element.getAttribute("width");
@@ -859,7 +859,7 @@ class Parser {
             }
           }
         }
-      });
+      }
     }
 
     /* parse custom row height
@@ -868,7 +868,7 @@ class Parser {
     */
     results = worksheet.findAllElements("row");
     if (results.isNotEmpty) {
-      results.forEach((element) {
+      for (var element in results) {
         String? rowAttribute =
             element.getAttribute("r"); // i think min refers to the column
         String? heightAttribute = element.getAttribute("ht");
@@ -882,7 +882,7 @@ class Parser {
             }
           }
         }
-      });
+      }
     }
   }
 }

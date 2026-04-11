@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 /// Styling class for cells
 // ignore: must_be_immutable
@@ -79,8 +79,8 @@ class _FontStyle extends Equatable {
   }
 
   /// Set Font Size
-  set fontSize(int? _fs) {
-    _fontSize = _fs;
+  set fontSize(int? fs) {
+    _fontSize = fs;
   }
 
   /// Get `Underline`

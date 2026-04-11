@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 class Border extends Equatable {
   final BorderStyle? borderStyle;
@@ -95,4 +95,4 @@ enum BorderStyle {
 
 BorderStyle? getBorderStyleByName(String name) =>
     BorderStyle.values.firstWhereOrNull((e) =>
-        e.toString().toLowerCase() == 'borderstyle.' + name.toLowerCase());
+        e.toString().toLowerCase() == 'borderstyle.${name.toLowerCase()}');

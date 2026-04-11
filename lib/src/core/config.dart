@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 const _relationshipsStyles =
     "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles";

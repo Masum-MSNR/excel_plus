@@ -14,7 +14,7 @@ class SavingHelper {
     final url = URL.createObjectURL(blob);
     final anchor = HTMLAnchorElement()
       ..href = url
-      ..download = '$fileName';
+      ..download = fileName;
 
     document.body?.append(anchor);
 

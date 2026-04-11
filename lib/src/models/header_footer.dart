@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 class HeaderFooter {
   bool? alignWithMargins;
@@ -95,7 +95,7 @@ class HeaderFooter {
 
 extension BoolParsing on String {
   bool parseBool() {
-    var value = this.toLowerCase();
+    var value = toLowerCase();
     if (value == 'true' || value == '1') {
       return true;
     } else if (value == 'false' || value == '0') {
@@ -106,7 +106,7 @@ extension BoolParsing on String {
   }
 
   String simplifyText() {
-    String value = this.replaceAll('&amp', '&');
+    String value = replaceAll('&amp', '&');
     value = value.replaceAll('amp', '&');
     value = value.replaceAll('&', '&amp;');
     value = value.replaceAll('"', '&quot;');

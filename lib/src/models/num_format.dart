@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 Map<V, K> _createInverseMap<K, V>(Map<K, V> map) {
   final inverse = <V, K>{};
@@ -250,6 +250,7 @@ sealed class StandardNumFormat implements NumFormat {
 }
 
 sealed class CustomNumFormat implements NumFormat {
+  @override
   String get formatCode;
 }
 
@@ -406,6 +407,7 @@ sealed class DateTimeNumFormat extends NumFormat {
 
 class StandardDateTimeNumFormat extends DateTimeNumFormat
     implements StandardNumFormat {
+  @override
   final int numFmtId;
 
   const StandardDateTimeNumFormat._({
@@ -504,6 +506,7 @@ sealed class TimeNumFormat extends NumFormat {
 }
 
 class StandardTimeNumFormat extends TimeNumFormat implements StandardNumFormat {
+  @override
   final int numFmtId;
 
   const StandardTimeNumFormat._({

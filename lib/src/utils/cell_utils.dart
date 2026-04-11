@@ -1,4 +1,4 @@
-part of excel_plus;
+part of '../../excel_plus.dart';
 
 final List<String> _noCompression = <String>[
   'mimetype',
