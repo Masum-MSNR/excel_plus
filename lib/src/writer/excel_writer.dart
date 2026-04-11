@@ -4,6 +4,7 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
   ExcelWriter._(super.excel, super.parser);
 
   List<int>? _save() {
+    parser._ensureAllSheetsParsed();
     if (_excel._styleChanges) {
       _processStylesFile();
     }

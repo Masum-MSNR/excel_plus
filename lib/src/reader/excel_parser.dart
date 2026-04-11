@@ -9,7 +9,6 @@ class Parser extends _ParserBase with _ParserStylesMixin {
     _parseStyles(_excel._stylesTarget);
     _parseSharedStrings();
     _parseContent();
-    _parseMergedCells();
   }
 
   @override
@@ -23,59 +22,68 @@ class Parser extends _ParserBase with _ParserStylesMixin {
     _excel._xmlFiles["xl/workbook.xml"] = document;
 
     document.findAllElements('sheet').forEach((node) {
-      if (run) {
-        _parseTable(node);
-      } else {
-        var rid = node.getAttribute('r:id');
-        if (rid != null && !_rId.contains(rid)) {
-          _rId.add(rid);
+      var name = node.getAttribute('name');
+      var rid = node.getAttribute('r:id');
+      if (name != null) {
+        // Create empty Sheet object so sheet names are visible immediately
+        if (_excel._sheetMap[name] == null) {
+          _excel._sheetMap[name] = Sheet._(_excel, name);
         }
+        // Store node for deferred parsing
+        _excel._pendingSheetNodes[name] = node;
+      }
+      if (!run && rid != null && !_rId.contains(rid)) {
+        _rId.add(rid);
       }
     });
   }
 
-  /// Parses and processes merged cells within the spreadsheet.
-  ///
-  /// This method identifies merged cell regions in each sheet of the spreadsheet
-  /// and handles them accordingly. It removes all cells within a merged cell region
-  /// except for the top-left cell, preserving its content.
-  void _parseMergedCells() {
-    Map spannedCells = <String, List<String>>{};
-    _excel._sheets.forEach((sheetName, node) {
-      _excel._availSheet(sheetName);
-      XmlElement sheetDataNode = node as XmlElement;
-      List spanList = <String>[];
-      final sheet = _excel._sheetMap[sheetName]!;
+  /// Parses a single sheet on demand. Called from [Excel._availSheet].
+  void _ensureSheetParsed(String sheetName) {
+    final node = _excel._pendingSheetNodes.remove(sheetName);
+    if (node == null) return;
+    _parseTable(node);
+    _parseMergedCellsForSheet(sheetName);
+  }
 
-      final worksheetNode = sheetDataNode.parent;
-      worksheetNode!.findAllElements('mergeCell').forEach((element) {
-        String? ref = element.getAttribute('ref');
-        if (ref != null && ref.contains(':') && ref.split(':').length == 2) {
-          if (!sheet._spannedItems.contains(ref)) {
-            sheet._spannedItems.add(ref);
-          }
+  /// Parses all remaining unparsed sheets.
+  void _ensureAllSheetsParsed() {
+    if (_excel._pendingSheetNodes.isEmpty) return;
+    for (final name in _excel._pendingSheetNodes.keys.toList()) {
+      _ensureSheetParsed(name);
+    }
+  }
 
-          String startCell = ref.split(':')[0], endCell = ref.split(':')[1];
+  /// Parses merged cells for a single sheet.
+  void _parseMergedCellsForSheet(String sheetName) {
+    final node = _excel._sheets[sheetName];
+    if (node == null) return;
+    _excel._availSheet(sheetName);
+    XmlElement sheetDataNode = node as XmlElement;
+    final sheet = _excel._sheetMap[sheetName]!;
 
-          if (!spanList.contains(startCell)) {
-            spanList.add(startCell);
-          }
-          spannedCells[sheetName] = spanList;
-
-          CellIndex startIndex = CellIndex.indexByString(startCell),
-              endIndex = CellIndex.indexByString(endCell);
-          _Span spanObj = _Span.fromCellIndex(
-            start: startIndex,
-            end: endIndex,
-          );
-          if (!sheet._spanList.contains(spanObj)) {
-            sheet._spanList.add(spanObj);
-
-            _deleteAllButTopLeftCellsOfSpanObj(spanObj, sheet);
-          }
-          _excel._mergeChangeLookup = sheetName;
+    final worksheetNode = sheetDataNode.parent;
+    worksheetNode!.findAllElements('mergeCell').forEach((element) {
+      String? ref = element.getAttribute('ref');
+      if (ref != null && ref.contains(':') && ref.split(':').length == 2) {
+        if (!sheet._spannedItems.contains(ref)) {
+          sheet._spannedItems.add(ref);
         }
-      });
+
+        String startCell = ref.split(':')[0], endCell = ref.split(':')[1];
+
+        CellIndex startIndex = CellIndex.indexByString(startCell),
+            endIndex = CellIndex.indexByString(endCell);
+        _Span spanObj = _Span.fromCellIndex(
+          start: startIndex,
+          end: endIndex,
+        );
+        if (!sheet._spanList.contains(spanObj)) {
+          sheet._spanList.add(spanObj);
+          _deleteAllButTopLeftCellsOfSpanObj(spanObj, sheet);
+        }
+        _excel._mergeChangeLookup = sheetName;
+      }
     });
   }
 

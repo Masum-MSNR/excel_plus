@@ -34,6 +34,7 @@ class Excel {
   final Map<String, String> _xmlSheetId = {};
   final Map<String, Map<String, int>> _cellStyleReferenced = {};
   final Map<String, Sheet> _sheetMap = {};
+  final Map<String, XmlElement> _pendingSheetNodes = {};
 
   List<CellStyle> _cellStyleList = [];
   List<String> _patternFill = [];
@@ -89,6 +90,7 @@ class Excel {
     if (_sheetMap.isEmpty) {
       _damagedExcel(text: "Corrupted Excel file.");
     }
+    parser._ensureAllSheetsParsed();
     return Map<String, Sheet>.from(_sheetMap);
   }
 
@@ -108,6 +110,7 @@ class Excel {
   ///where `key` is the `Sheet Name` and the `value` is the `Sheet Object`
   ///
   Map<String, Sheet> get sheets {
+    parser._ensureAllSheetsParsed();
     return Map<String, Sheet>.from(_sheetMap);
   }
 
@@ -512,6 +515,9 @@ class Excel {
   ///Make `sheet` available if it does not exist in `_sheetMap`
   ///
   void _availSheet(String sheet) {
+    if (_pendingSheetNodes.containsKey(sheet)) {
+      parser._ensureSheetParsed(sheet);
+    }
     if (_sheetMap[sheet] == null) {
       _sheetMap[sheet] = Sheet._(this, sheet);
     }
