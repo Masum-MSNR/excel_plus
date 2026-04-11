@@ -154,6 +154,10 @@ class Parser extends _ParserBase with _ParserStylesMixin {
     _excel._xmlFiles['xl/$target'] = content;
     _excel._xmlSheetId[name] = 'xl/$target';
 
+    // Free DOM cell nodes — writer rebuilds from _sheetData.
+    // This reclaims the bulk of XML DOM memory for large sheets.
+    sheet.children.clear();
+
     _normalizeTable(sheetObject);
   }
 

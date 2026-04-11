@@ -1,17 +1,12 @@
 part of '../../excel_plus.dart';
 
-// ignore: must_be_immutable
-class Data extends Equatable {
+class Data {
   CellStyle? _cellStyle;
   CellValue? _value;
   Sheet _sheet;
-  String _sheetName;
   int _rowIndex;
   int _columnIndex;
 
-  ///
-  ///It will clone the object by changing the `this` reference of previous DataObject and putting `new this` reference, with copying the values too
-  ///
   Data._clone(Sheet sheet, Data dataObject)
       : this._(
           sheet,
@@ -21,9 +16,6 @@ class Data extends Equatable {
           cellStyleVal: dataObject._cellStyle,
         );
 
-  ///
-  ///Initializes the new `Data Object`
-  ///
   Data._(
     Sheet sheet,
     int row,
@@ -35,29 +27,21 @@ class Data extends Equatable {
   })  : _sheet = sheet,
         _value = value,
         _cellStyle = cellStyleVal,
-        _sheetName = sheet.sheetName,
         _rowIndex = row,
         _columnIndex = column;
 
-  /// returns the newData object when called from Sheet Class
   static Data newData(Sheet sheet, int row, int column) {
     return Data._(sheet, row, column);
   }
 
   /// returns the row Index
-  int get rowIndex {
-    return _rowIndex;
-  }
+  int get rowIndex => _rowIndex;
 
   /// returns the column Index
-  int get columnIndex {
-    return _columnIndex;
-  }
+  int get columnIndex => _columnIndex;
 
   /// returns the sheet-name
-  String get sheetName {
-    return _sheetName;
-  }
+  String get sheetName => _sheet.sheetName;
 
   /// returns the string based cellId as A1, A2 or Z5
   CellIndex get cellIndex {
@@ -66,11 +50,6 @@ class Data extends Equatable {
   }
 
   /// Helps to set the formula
-  ///```
-  ///var sheet = excel['Sheet1'];
-  ///var cell = sheet.cell(CellIndex.indexByString("E5"));
-  ///cell.setFormula('=SUM(1,2)');
-  ///```
   void setFormula(String formula) {
     _sheet.updateCell(cellIndex, FormulaCellValue(formula));
   }
@@ -98,11 +77,14 @@ class Data extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        _value,
-        _columnIndex,
-        _rowIndex,
-        _cellStyle,
-        _sheetName,
-      ];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Data &&
+          _rowIndex == other._rowIndex &&
+          _columnIndex == other._columnIndex &&
+          _value == other._value &&
+          _cellStyle == other._cellStyle;
+
+  @override
+  int get hashCode => Object.hash(_rowIndex, _columnIndex, _value, _cellStyle);
 }

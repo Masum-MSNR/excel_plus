@@ -34,9 +34,38 @@ abstract class _WriterBase {
     return ((maxNumOfCharacters * 7.0 + 9.0) / 7.0 * 256).truncate() / 256;
   }
 
-  // Manage value's type
-  XmlElement _createCell(String sheet, int columnIndex, int rowIndex,
-      CellValue? value, NumFormat? numberFormat) {
+  /// Builds all cell XML for a sheet as a string, bypassing DOM node creation.
+  /// This avoids allocating millions of XmlElement objects during save.
+  String _buildSheetDataXml(String sheetName, Sheet sheetObject) {
+    final buf = StringBuffer();
+    final customHeights = sheetObject.getRowHeights;
+
+    for (var rowIndex = 0; rowIndex < sheetObject._maxRows; rowIndex++) {
+      if (sheetObject._sheetData[rowIndex] == null) continue;
+
+      double? height = customHeights[rowIndex];
+      buf.write('<row r="${rowIndex + 1}"');
+      if (height != null) {
+        buf.write(' ht="${height.toStringAsFixed(2)}" customHeight="1"');
+      }
+      buf.write('>');
+
+      for (var colIndex = 0;
+          colIndex < sheetObject._maxColumns;
+          colIndex++) {
+        var data = sheetObject._sheetData[rowIndex]![colIndex];
+        if (data == null) continue;
+        _writeCellXml(buf, sheetName, colIndex, rowIndex, data.value,
+            data.cellStyle?.numberFormat);
+      }
+      buf.write('</row>');
+    }
+    return buf.toString();
+  }
+
+  /// Writes a single cell's XML directly to a StringBuffer.
+  void _writeCellXml(StringBuffer buf, String sheet, int columnIndex,
+      int rowIndex, CellValue? value, NumFormat? numberFormat) {
     SharedString? sharedString;
     if (value is TextCellValue) {
       sharedString = _excel._sharedStrings.tryFind(value.toString());
@@ -48,126 +77,90 @@ abstract class _WriterBase {
     }
 
     String rC = getCellId(columnIndex, rowIndex);
+    buf.write('<c r="$rC"');
 
-    var attributes = <XmlAttribute>[
-      XmlAttribute(XmlName('r'), rC),
-      if (value is TextCellValue) XmlAttribute(XmlName('t'), 's'),
-      if (value is BoolCellValue) XmlAttribute(XmlName('t'), 'b'),
-    ];
-
+    // Style attribute
     final cellStyle =
         _excel._sheetMap[sheet]?._sheetData[rowIndex]?[columnIndex]?.cellStyle;
-
     if (_excel._styleChanges && cellStyle != null) {
-      int upperLevelPos = _excel._cellStyleList.indexOf(cellStyle);
-      if (upperLevelPos == -1) {
-        int lowerLevelPos = _innerCellStyle[cellStyle] ?? -1;
-        if (lowerLevelPos != -1) {
-          upperLevelPos = lowerLevelPos + _excel._cellStyleList.length;
+      int pos = _excel._cellStyleList.indexOf(cellStyle);
+      if (pos == -1) {
+        int lowerPos = _innerCellStyle[cellStyle] ?? -1;
+        if (lowerPos != -1) {
+          pos = lowerPos + _excel._cellStyleList.length;
         } else {
-          upperLevelPos = 0;
+          pos = 0;
         }
       }
-      attributes.insert(
-        1,
-        XmlAttribute(XmlName('s'), '$upperLevelPos'),
-      );
+      buf.write(' s="$pos"');
     } else if (_excel._cellStyleReferenced.containsKey(sheet) &&
         _excel._cellStyleReferenced[sheet]!.containsKey(rC)) {
-      attributes.insert(
-        1,
-        XmlAttribute(
-            XmlName('s'), '${_excel._cellStyleReferenced[sheet]![rC]}'),
-      );
+      buf.write(' s="${_excel._cellStyleReferenced[sheet]![rC]}"');
     }
 
-    // TODO track & write the numFmts/numFmt to styles.xml if used
-    final List<XmlElement> children;
+    // Type attribute
+    if (value is TextCellValue) buf.write(' t="s"');
+    if (value is BoolCellValue) buf.write(' t="b"');
+
+    buf.write('>');
+
+    // Value children
     switch (value) {
       case null:
-        children = [];
+        break;
       case FormulaCellValue():
-        children = [
-          XmlElement(XmlName('f'), [], [XmlText(value.formula)]),
-          XmlElement(XmlName('v'), [], [XmlText('')]),
-        ];
+        buf.write('<f>${_escapeXmlValue(value.formula)}</f><v></v>');
       case IntCellValue():
-        final String v = switch (numberFormat) {
+        final v = switch (numberFormat) {
           NumericNumFormat() => numberFormat.writeInt(value),
           _ => throw Exception(
               '$numberFormat does not work for ${value.runtimeType}'),
         };
-        children = [
-          XmlElement(XmlName('v'), [], [XmlText(v)]),
-        ];
+        buf.write('<v>$v</v>');
       case DoubleCellValue():
-        final String v = switch (numberFormat) {
+        final v = switch (numberFormat) {
           NumericNumFormat() => numberFormat.writeDouble(value),
           _ => throw Exception(
               '$numberFormat does not work for ${value.runtimeType}'),
         };
-        children = [
-          XmlElement(XmlName('v'), [], [XmlText(v)]),
-        ];
+        buf.write('<v>$v</v>');
       case DateTimeCellValue():
-        final String v = switch (numberFormat) {
+        final v = switch (numberFormat) {
           DateTimeNumFormat() => numberFormat.writeDateTime(value),
           _ => throw Exception(
               '$numberFormat does not work for ${value.runtimeType}'),
         };
-        children = [
-          XmlElement(XmlName('v'), [], [XmlText(v)]),
-        ];
+        buf.write('<v>$v</v>');
       case DateCellValue():
-        final String v = switch (numberFormat) {
+        final v = switch (numberFormat) {
           DateTimeNumFormat() => numberFormat.writeDate(value),
           _ => throw Exception(
               '$numberFormat does not work for ${value.runtimeType}'),
         };
-        children = [
-          XmlElement(XmlName('v'), [], [XmlText(v)]),
-        ];
+        buf.write('<v>$v</v>');
       case TimeCellValue():
-        final String v = switch (numberFormat) {
+        final v = switch (numberFormat) {
           TimeNumFormat() => numberFormat.writeTime(value),
           _ => throw Exception(
               '$numberFormat does not work for ${value.runtimeType}'),
         };
-        children = [
-          XmlElement(XmlName('v'), [], [XmlText(v)]),
-        ];
+        buf.write('<v>$v</v>');
       case TextCellValue():
-        children = [
-          XmlElement(XmlName('v'), [], [
-            XmlText(_excel._sharedStrings.indexOf(sharedString!).toString())
-          ]),
-        ];
+        buf.write(
+            '<v>${_excel._sharedStrings.indexOf(sharedString!)}</v>');
       case BoolCellValue():
-        children = [
-          XmlElement(XmlName('v'), [], [XmlText(value.value ? '1' : '0')]),
-        ];
+        buf.write('<v>${value.value ? '1' : '0'}</v>');
     }
-
-    return XmlElement(XmlName('c'), attributes, children);
+    buf.write('</c>');
   }
 
-  /// Create a new row in the sheet.
-  XmlElement _createNewRow(XmlElement table, int rowIndex, double? height) {
-    var row = XmlElement(XmlName('row'), [
-      XmlAttribute(XmlName('r'), (rowIndex + 1).toString()),
-      if (height != null)
-        XmlAttribute(XmlName('ht'), height.toStringAsFixed(2)),
-      if (height != null) XmlAttribute(XmlName('customHeight'), '1'),
-    ], []);
-    table.children.add(row);
-    return row;
-  }
-
-  XmlElement _updateCell(String sheet, XmlElement row, int columnIndex,
-      int rowIndex, CellValue? value, NumFormat? numberFormat) {
-    var cell = _createCell(sheet, columnIndex, rowIndex, value, numberFormat);
-    row.children.add(cell);
-    return cell;
+  static String _escapeXmlValue(String input) {
+    return input
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&apos;');
   }
 
   _BorderSet _createBorderSetFromCellStyle(CellStyle cellStyle) => _BorderSet(

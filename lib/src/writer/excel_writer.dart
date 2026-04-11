@@ -23,6 +23,7 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
     }
 
     for (var xmlFile in _excel._xmlFiles.keys) {
+      if (_archiveFiles.containsKey(xmlFile)) continue;
       var xml = _excel._xmlFiles[xmlFile].toString();
       var content = utf8.encode(xml);
       _archiveFiles[xmlFile] = ArchiveFile(xmlFile, content.length, content);
@@ -85,34 +86,6 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
       columnWidths.add(width);
 
       _addNewColumn(columns, index, index, width);
-    }
-  }
-
-  void _setRows(String sheetName, Sheet sheetObject) {
-    final customHeights = sheetObject.getRowHeights;
-
-    for (var rowIndex = 0; rowIndex < sheetObject._maxRows; rowIndex++) {
-      double? height;
-
-      if (customHeights.containsKey(rowIndex)) {
-        height = customHeights[rowIndex];
-      }
-
-      if (sheetObject._sheetData[rowIndex] == null) {
-        continue;
-      }
-      var foundRow = _createNewRow(
-          _excel._sheets[sheetName]! as XmlElement, rowIndex, height);
-      for (var columnIndex = 0;
-          columnIndex < sheetObject._maxColumns;
-          columnIndex++) {
-        var data = sheetObject._sheetData[rowIndex]![columnIndex];
-        if (data == null) {
-          continue;
-        }
-        _updateCell(sheetName, foundRow, columnIndex, rowIndex, data.value,
-            data.cellStyle?.numberFormat);
-      }
     }
   }
 
@@ -386,9 +359,25 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
 
       _setColumns(sheetObject, xmlFile);
 
-      _setRows(sheetName, sheetObject);
-
       _setHeaderFooter(sheetName);
+
+      // Build cell data as XML string (no DOM node allocation)
+      String cellDataXml = _buildSheetDataXml(sheetName, sheetObject);
+
+      // Serialize the envelope DOM (with empty sheetData) to string
+      String envelopeXml = xmlFile.toString();
+
+      // Inject cell data into the serialized envelope
+      String sheetXml = envelopeXml.replaceFirst(
+        RegExp(r'<sheetData\s*/>|<sheetData\s*>\s*</sheetData>'),
+        '<sheetData>$cellDataXml</sheetData>',
+      );
+
+      // Store directly as archive file — skip the later DOM serialization loop
+      var xmlSheetId = _excel._xmlSheetId[sheetName]!;
+      var bytes = utf8.encode(sheetXml);
+      _archiveFiles[xmlSheetId] =
+          ArchiveFile(xmlSheetId, bytes.length, bytes);
     });
   }
 }
