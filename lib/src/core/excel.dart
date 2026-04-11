@@ -305,8 +305,8 @@ class Excel {
   ///It will start setting the edited values of `sheets` into the `files` and then `exports the file`.
   ///
   List<int>? encode() {
-    Save s = Save._(this, parser);
-    return s._save();
+    ExcelWriter writer = ExcelWriter._(this, parser);
+    return writer._save();
   }
 
   /// Starts Saving the file.
@@ -331,8 +331,8 @@ class Excel {
   ///
   ///```
   List<int>? save({String fileName = 'FlutterExcel.xlsx'}) {
-    Save s = Save._(this, parser);
-    var onValue = s._save();
+    ExcelWriter writer = ExcelWriter._(this, parser);
+    var onValue = writer._save();
     return helper.SavingHelper.saveFile(onValue, fileName);
   }
 

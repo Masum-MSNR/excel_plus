@@ -1,12 +1,12 @@
 part of excel_plus;
 
-class Save {
+class ExcelWriter {
   final Excel _excel;
   final Map<String, ArchiveFile> _archiveFiles = {};
   final List<CellStyle> _innerCellStyle = [];
   final Parser parser;
 
-  Save._(this._excel, this.parser);
+  ExcelWriter._(this._excel, this.parser);
 
   void _addNewColumn(XmlElement columns, int min, int max, double width) {
     columns.children.add(XmlElement(XmlName('col'), [
@@ -30,16 +30,6 @@ class Save {
 
     return ((maxNumOfCharacters * 7.0 + 9.0) / 7.0 * 256).truncate() / 256;
   }
-
-  /*   XmlElement _replaceCell(String sheet, XmlElement row, XmlElement lastCell,
-      int columnIndex, int rowIndex, CellValue? value) {
-    var index = lastCell == null ? 0 : row.children.indexOf(lastCell);
-    var cell = _createCell(sheet, columnIndex, rowIndex, value);
-    row.children
-      ..removeAt(index)
-      ..insert(index, cell);
-    return cell;
-  } */
 
   // Manage value's type
   XmlElement _createCell(String sheet, int columnIndex, int rowIndex,
