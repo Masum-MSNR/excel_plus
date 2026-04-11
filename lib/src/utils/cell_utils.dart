@@ -57,10 +57,6 @@ int? _getRowNumber(XmlElement row) {
   return int.tryParse(row.getAttribute('r').toString());
 }
 
-int _checkPosition(List<CellStyle> list, CellStyle cellStyle) {
-  return list.indexOf(cellStyle);
-}
-
 int _letterOnly(int rune) {
   if (65 <= rune && rune <= 90) {
     return rune;

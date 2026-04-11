@@ -5,24 +5,25 @@ mixin _WriterStylesMixin on _WriterBase {
   /// Writing Font Color in [xl/styles.xml] from the Cells of the sheets.
   void _processStylesFile() {
     _innerCellStyle.clear();
-    List<String> innerPatternFill = <String>[];
-    List<_FontStyle> innerFontStyle = <_FontStyle>[];
-    List<_BorderSet> innerBorderSet = <_BorderSet>[];
+    Map<String, int> innerPatternFillIndex = {};
+    List<String> innerPatternFill = [];
+    Map<_FontStyle, int> innerFontStyleIndex = {};
+    List<_FontStyle> innerFontStyle = [];
+    Map<_BorderSet, int> innerBorderSetIndex = {};
+    List<_BorderSet> innerBorderSet = [];
 
     _excel._sheetMap.forEach((sheetName, sheetObject) {
       sheetObject._sheetData.forEach((_, columnMap) {
         columnMap.forEach((_, dataObject) {
           if (dataObject.cellStyle != null) {
-            int pos = _checkPosition(_innerCellStyle, dataObject.cellStyle!);
-            if (pos == -1) {
-              _innerCellStyle.add(dataObject.cellStyle!);
-            }
+            _innerCellStyle.putIfAbsent(
+                dataObject.cellStyle!, () => _innerCellStyle.length);
           }
         });
       });
     });
 
-    for (var cellStyle in _innerCellStyle) {
+    for (var cellStyle in _innerCellStyle.keys) {
       _FontStyle fs = _FontStyle(
           bold: cellStyle.isBold,
           italic: cellStyle.isItalic,
@@ -33,19 +34,22 @@ mixin _WriterStylesMixin on _WriterBase {
           fontScheme: cellStyle.fontScheme);
 
       if (_fontStyleIndex(_excel._fontStyleList, fs) == -1 &&
-          _fontStyleIndex(innerFontStyle, fs) == -1) {
+          !innerFontStyleIndex.containsKey(fs)) {
+        innerFontStyleIndex[fs] = innerFontStyle.length;
         innerFontStyle.add(fs);
       }
 
       String backgroundColor = cellStyle.backgroundColor.colorHex;
       if (!_excel._patternFill.contains(backgroundColor) &&
-          !innerPatternFill.contains(backgroundColor)) {
+          !innerPatternFillIndex.containsKey(backgroundColor)) {
+        innerPatternFillIndex[backgroundColor] = innerPatternFill.length;
         innerPatternFill.add(backgroundColor);
       }
 
       final bs = _createBorderSetFromCellStyle(cellStyle);
       if (!_excel._borderSetList.contains(bs) &&
-          !innerBorderSet.contains(bs)) {
+          !innerBorderSetIndex.containsKey(bs)) {
+        innerBorderSetIndex[bs] = innerBorderSet.length;
         innerBorderSet.add(bs);
       }
     }
@@ -205,7 +209,7 @@ mixin _WriterStylesMixin on _WriterBase {
           '${_excel._cellStyleList.length + _innerCellStyle.length}'));
     }
 
-    for (var cellStyle in _innerCellStyle) {
+    for (var cellStyle in _innerCellStyle.keys) {
       String backgroundColor = cellStyle.backgroundColor.colorHex;
 
       _FontStyle fs = _FontStyle(
@@ -220,10 +224,10 @@ mixin _WriterStylesMixin on _WriterBase {
       VerticalAlign verticalAlign = cellStyle.verticalAlignment;
       int rotation = cellStyle.rotation;
       TextWrapping? textWrapping = cellStyle.wrap;
-      int backgroundIndex = innerPatternFill.indexOf(backgroundColor),
-          fontIndex = _fontStyleIndex(innerFontStyle, fs);
+      int backgroundIndex = innerPatternFillIndex[backgroundColor] ?? -1;
+      int fontIndex = innerFontStyleIndex[fs] ?? -1;
       _BorderSet bs = _createBorderSetFromCellStyle(cellStyle);
-      int borderIndex = innerBorderSet.indexOf(bs);
+      int borderIndex = innerBorderSetIndex[bs] ?? -1;
 
       final numberFormat = cellStyle.numberFormat;
       final int numFmtId = switch (numberFormat) {
@@ -243,7 +247,7 @@ mixin _WriterStylesMixin on _WriterBase {
       ];
 
       if ((_excel._patternFill.contains(backgroundColor) ||
-              innerPatternFill.contains(backgroundColor)) &&
+              innerPatternFillIndex.containsKey(backgroundColor)) &&
           backgroundColor != "none" &&
           backgroundColor != "gray125" &&
           backgroundColor.toLowerCase() != "lightgray") {
@@ -251,7 +255,7 @@ mixin _WriterStylesMixin on _WriterBase {
       }
 
       if (_fontStyleIndex(_excel._fontStyleList, fs) != -1 &&
-          _fontStyleIndex(innerFontStyle, fs) != -1) {
+          innerFontStyleIndex.containsKey(fs)) {
         attributes.add(XmlAttribute(XmlName('applyFont'), '1'));
       }
 

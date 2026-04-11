@@ -121,6 +121,7 @@ class _FontStyle extends Equatable {
         _underline,
         _fontFamily,
         _fontColorHex,
+        _fontScheme,
       ];
 }
 

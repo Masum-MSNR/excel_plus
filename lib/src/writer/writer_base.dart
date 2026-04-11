@@ -6,7 +6,7 @@ part of '../../excel_plus.dart';
 abstract class _WriterBase {
   final Excel _excel;
   final Map<String, ArchiveFile> _archiveFiles = {};
-  final List<CellStyle> _innerCellStyle = [];
+  final Map<CellStyle, int> _innerCellStyle = {};
   final Parser parser;
 
   _WriterBase(this._excel, this.parser);
@@ -59,9 +59,9 @@ abstract class _WriterBase {
         _excel._sheetMap[sheet]?._sheetData[rowIndex]?[columnIndex]?.cellStyle;
 
     if (_excel._styleChanges && cellStyle != null) {
-      int upperLevelPos = _checkPosition(_excel._cellStyleList, cellStyle);
+      int upperLevelPos = _excel._cellStyleList.indexOf(cellStyle);
       if (upperLevelPos == -1) {
-        int lowerLevelPos = _checkPosition(_innerCellStyle, cellStyle);
+        int lowerLevelPos = _innerCellStyle[cellStyle] ?? -1;
         if (lowerLevelPos != -1) {
           upperLevelPos = lowerLevelPos + _excel._cellStyleList.length;
         } else {
