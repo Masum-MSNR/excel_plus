@@ -25,18 +25,27 @@ part 'src/models/enums.dart';
 part 'src/models/span.dart';
 part 'src/models/shared_string.dart';
 part 'src/models/num_format.dart';
+part 'src/models/num_format_temporal.dart';
 
 /// Sheet
+part 'src/sheet/sheet_base.dart';
+part 'src/sheet/sheet_row_column.dart';
+part 'src/sheet/sheet_merge.dart';
 part 'src/sheet/sheet.dart';
 
 /// Reader
+part 'src/reader/parser_base.dart';
+part 'src/reader/parser_styles.dart';
 part 'src/reader/excel_parser.dart';
 
 /// Writer
+part 'src/writer/writer_base.dart';
+part 'src/writer/writer_styles.dart';
 part 'src/writer/excel_writer.dart';
 part 'src/writer/span_corrector.dart';
 
 /// Utils
 part 'src/utils/archive_utils.dart';
 part 'src/utils/cell_utils.dart';
+part 'src/utils/color_utils.dart';
 part 'src/utils/fast_list.dart';
