@@ -83,7 +83,7 @@ abstract class _WriterBase {
     final cellStyle =
         _excel._sheetMap[sheet]?._sheetData[rowIndex]?[columnIndex]?.cellStyle;
     if (_excel._styleChanges && cellStyle != null) {
-      int pos = _excel._cellStyleList.indexOf(cellStyle);
+      int pos = _excel._cellStyleIndexOf(cellStyle);
       if (pos == -1) {
         int lowerPos = _innerCellStyle[cellStyle] ?? -1;
         if (lowerPos != -1) {

@@ -128,132 +128,205 @@ class Parser extends _ParserBase with _ParserStylesMixin {
     var file = _excel._archive.findFile('xl/$target');
     file!.decompress();
 
-    var content = XmlDocument.parse(utf8.decode(file.content));
+    var xmlStr = utf8.decode(file.content);
+
+    // Split XML into envelope (small) and sheetData (huge).
+    // Parse envelope as DOM for writer; SAX-parse sheetData for cells.
+    final sheetDataStart = xmlStr.indexOf('<sheetData');
+    if (sheetDataStart == -1) {
+      // No sheetData at all — parse as DOM fallback
+      var content = XmlDocument.parse(xmlStr);
+      _excel._xmlFiles['xl/$target'] = content;
+      _excel._xmlSheetId[name] = 'xl/$target';
+      _normalizeTable(sheetObject);
+      return;
+    }
+
+    // Find end of sheetData section
+    final selfCloseCheck = xmlStr.indexOf('/>', sheetDataStart);
+    final openTagEnd = xmlStr.indexOf('>', sheetDataStart);
+    String envelopeXml;
+    String sheetDataXml;
+
+    if (selfCloseCheck != -1 && selfCloseCheck == openTagEnd - 1) {
+      // Self-closing: <sheetData/>
+      envelopeXml = xmlStr; // already has <sheetData/>
+      sheetDataXml = '';
+    } else {
+      final sheetDataEnd = xmlStr.indexOf('</sheetData>', openTagEnd);
+      if (sheetDataEnd == -1) {
+        _damagedExcel(text: 'Missing </sheetData> closing tag');
+      }
+      // Extract sheetData inner content for SAX parsing
+      sheetDataXml = xmlStr.substring(openTagEnd + 1, sheetDataEnd);
+      // Build envelope: everything before <sheetData...> + <sheetData/> + everything after </sheetData>
+      envelopeXml = '${xmlStr.substring(0, sheetDataStart)}<sheetData/>${xmlStr.substring(sheetDataEnd + '</sheetData>'.length)}';
+    }
+
+    // Parse the lightweight envelope DOM (no cell data — just worksheet structure)
+    var content = XmlDocument.parse(envelopeXml);
     var worksheet = content.findElements('worksheet').first;
 
-    ///
-    /// check for right to left view
-    ///
+    // RTL
     var sheetView = worksheet.findAllElements('sheetView').toList();
     if (sheetView.isNotEmpty) {
       var sheetViewNode = sheetView.first;
       var rtl = sheetViewNode.getAttribute('rightToLeft');
       sheetObject.isRTL = rtl != null && rtl == '1';
     }
-    var sheet = worksheet.findElements('sheetData').first;
 
-    _findRows(sheet).forEach((child) {
-      _parseRow(child, sheetObject, name);
-    });
+    // SAX-parse cell data — zero DOM allocation for cells
+    if (sheetDataXml.isNotEmpty) {
+      _saxParseSheetData(sheetDataXml, sheetObject, name);
+    }
 
     _parseHeaderFooter(worksheet, sheetObject);
     _parseColWidthsRowHeights(worksheet, sheetObject);
 
+    var sheet = worksheet.findElements('sheetData').first;
     _excel._sheets[name] = sheet;
-
     _excel._xmlFiles['xl/$target'] = content;
     _excel._xmlSheetId[name] = 'xl/$target';
-
-    // Free DOM cell nodes — writer rebuilds from _sheetData.
-    // This reclaims the bulk of XML DOM memory for large sheets.
-    sheet.children.clear();
 
     _normalizeTable(sheetObject);
   }
 
-  void _parseRow(XmlElement node, Sheet sheetObject, String name) {
-    var rowIndex = (_getRowNumber(node) ?? -1) - 1;
-    if (rowIndex < 0) {
-      return;
-    }
+  /// SAX-parses the inner content of `<sheetData>...</sheetData>`.
+  /// Extracts cell values directly from events without DOM allocation.
+  void _saxParseSheetData(String xml, Sheet sheetObject, String sheetName) {
+    // Wrap in a root element so parseEvents can handle it
+    final wrappedXml = '<sheetData>$xml</sheetData>';
 
-    _findCells(node).forEach((child) {
-      _parseCell(child, sheetObject, rowIndex, name);
-    });
+    int currentRow = -1;
+    String? cellRef;
+    String? cellType;
+    int cellStyle = 0;
+    String? currentElement; // 'v', 'f', 't'
+    StringBuffer valueBuf = StringBuffer();
+    StringBuffer? formulaBuf;
+
+    for (final event in parseEvents(wrappedXml)) {
+      if (event is XmlStartElementEvent) {
+        switch (event.name) {
+          case 'row':
+            for (final attr in event.attributes) {
+              if (attr.localName == 'r') {
+                currentRow = (int.tryParse(attr.value) ?? 0) - 1;
+              } else if (attr.localName == 'ht') {
+                final height = double.tryParse(attr.value);
+                if (height != null && currentRow >= 0) {
+                  sheetObject._rowHeights[currentRow] = height;
+                }
+              }
+            }
+          case 'c':
+            cellRef = null;
+            cellType = null;
+            cellStyle = 0;
+            valueBuf.clear();
+            formulaBuf = null;
+            for (final attr in event.attributes) {
+              switch (attr.localName) {
+                case 'r':
+                  cellRef = attr.value;
+                case 't':
+                  cellType = attr.value;
+                case 's':
+                  cellStyle = int.tryParse(attr.value) ?? 0;
+              }
+            }
+          case 'v':
+            currentElement = 'v';
+            valueBuf.clear();
+          case 'f':
+            currentElement = 'f';
+            formulaBuf = StringBuffer();
+          case 't':
+            // inline string <is><t>text</t></is>
+            if (cellType == 'inlineStr') {
+              currentElement = 't';
+              valueBuf.clear();
+            }
+        }
+      } else if (event is XmlEndElementEvent) {
+        switch (event.name) {
+          case 'c':
+            if (cellRef != null && currentRow >= 0) {
+              _processSaxCell(
+                  sheetObject, sheetName, cellRef, cellType, cellStyle,
+                  valueBuf.toString(), formulaBuf?.toString());
+            }
+            currentElement = null;
+          case 'v':
+          case 'f':
+          case 't':
+            currentElement = null;
+        }
+      } else if (event is XmlTextEvent) {
+        switch (currentElement) {
+          case 'v':
+            valueBuf.write(event.value);
+          case 'f':
+            formulaBuf?.write(event.value);
+          case 't':
+            valueBuf.write(event.value);
+        }
+      }
+    }
   }
 
-  void _parseCell(
-      XmlElement node, Sheet sheetObject, int rowIndex, String name) {
-    int? columnIndex = _getCellNumber(node);
-    if (columnIndex == null) {
-      return;
-    }
+  /// Processes a single cell extracted from SAX events.
+  void _processSaxCell(Sheet sheetObject, String sheetName, String cellRef,
+      String? type, int styleIndex, String rawValue, String? formula) {
+    final coords = _cellCoordsFromCellId(cellRef);
+    final rowIndex = coords.$1;
+    final columnIndex = coords.$2;
 
-    var s1 = node.getAttribute('s');
-    int s = 0;
-    if (s1 != null) {
-      try {
-        s = int.parse(s1.toString());
-      } catch (_) {}
-
-      String rC = node.getAttribute('r').toString();
-
-      if (_excel._cellStyleReferenced[name] == null) {
-        _excel._cellStyleReferenced[name] = {rC: s};
+    // Style reference tracking
+    if (styleIndex > 0) {
+      if (_excel._cellStyleReferenced[sheetName] == null) {
+        _excel._cellStyleReferenced[sheetName] = {cellRef: styleIndex};
       } else {
-        _excel._cellStyleReferenced[name]![rC] = s;
+        _excel._cellStyleReferenced[sheetName]![cellRef] = styleIndex;
       }
     }
 
     CellValue? value;
-    String? type = node.getAttribute('t');
 
     switch (type) {
-      // sharedString
-      case 's':
-        final sharedString = _excel._sharedStrings
-            .value(int.parse(_parseValue(node.findElements('v').first)));
-        value = TextCellValue.span(sharedString!.textSpan);
-        break;
-      // boolean
-      case 'b':
-        value = BoolCellValue(_parseValue(node.findElements('v').first) == '1');
-        break;
-      // error
-      case 'e':
-      // formula
-      case 'str':
-        value = FormulaCellValue(_parseValue(node.findElements('v').first));
-        break;
-      // inline string
+      case 's': // shared string
+        final ss = _excel._sharedStrings.value(int.parse(rawValue));
+        value = TextCellValue.span(ss!.textSpan);
+      case 'b': // boolean
+        value = BoolCellValue(rawValue == '1');
+      case 'e': // error
+      case 'str': // formula result string
+        value = FormulaCellValue(rawValue);
       case 'inlineStr':
-        // <c r='B2' t='inlineStr'>
-        // <is><t>Dartonico</t></is>
-        // </c>
-        value = TextCellValue(_parseValue(node.findAllElements('t').first));
-        break;
-      // number
-      case 'n':
-      default:
-        var formulaNode = node.findElements('f');
-        if (formulaNode.isNotEmpty) {
-          value = FormulaCellValue(_parseValue(formulaNode.first).toString());
-        } else {
-          final vNode = node.findElements('v').firstOrNull;
-          if (vNode == null) {
-            value = null;
-          } else if (s1 != null) {
-            final v = _parseValue(vNode);
-            var numFmtId = _excel._numFmtIds[s];
-            final numFormat = _excel._numFormats.getByNumFmtId(numFmtId);
-            if (numFormat == null) {
-              assert(
-                  false, 'found no number format spec for numFmtId $numFmtId');
-              value = NumFormat.defaultNumeric.read(v);
-            } else {
-              value = numFormat.read(v);
-            }
+        value = TextCellValue(rawValue);
+      case 'n': // number (explicit)
+      default: // number (default)
+        if (formula != null) {
+          value = FormulaCellValue(formula);
+        } else if (rawValue.isEmpty) {
+          value = null;
+        } else if (styleIndex > 0) {
+          var numFmtId = _excel._numFmtIds[styleIndex];
+          final numFormat = _excel._numFormats.getByNumFmtId(numFmtId);
+          if (numFormat == null) {
+            value = NumFormat.defaultNumeric.read(rawValue);
           } else {
-            final v = _parseValue(vNode);
-            value = NumFormat.defaultNumeric.read(v);
+            value = numFormat.read(rawValue);
           }
+        } else {
+          value = NumFormat.defaultNumeric.read(rawValue);
         }
     }
 
     sheetObject.updateCell(
       CellIndex.indexByColumnRow(columnIndex: columnIndex, rowIndex: rowIndex),
       value,
-      cellStyle: _excel._cellStyleList[s],
+      cellStyle: _excel._cellStyleList[styleIndex],
     );
   }
 

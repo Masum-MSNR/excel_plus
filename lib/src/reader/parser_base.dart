@@ -125,21 +125,125 @@ abstract class _ParserBase {
       sharedStrings = _excel._archive.findFile("xl/sharedStrings.xml");
     }
     sharedStrings!.decompress();
-    var document = XmlDocument.parse(utf8.decode(sharedStrings.content));
-    _excel._xmlFiles["xl/${_excel._sharedStringsTarget}"] = document;
+    var xmlStr = utf8.decode(sharedStrings.content);
 
-    document.findAllElements('si').forEach((node) {
-      _parseSharedString(node);
-    });
+    // Store a minimal empty <sst/> DOM so the writer can find the key.
+    _excel._xmlFiles["xl/${_excel._sharedStringsTarget}"] =
+        XmlDocument.parse(
+            '<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="0" uniqueCount="0"/>');
 
-    // Free DOM children — values are cached in SharedString objects.
-    document.findAllElements('sst').first.children.clear();
-    _excel._sharedStrings.dropNodes();
+    // SAX-parse shared strings — no full DOM tree created.
+    _saxParseSharedStrings(xmlStr);
   }
 
-  void _parseSharedString(XmlElement node) {
-    final sharedString = SharedString(node: node);
-    _excel._sharedStrings.add(sharedString, sharedString.stringValue);
+  /// SAX-based shared string parser. Processes `<si>` elements without
+  /// building a DOM tree. Simple strings (just `<t>`) are stored as plain
+  /// text. Rich text (`<r>` elements) are parsed individually.
+  void _saxParseSharedStrings(String xmlStr) {
+    // State machine
+    bool inSi = false;
+    bool inR = false; // inside <r> (rich text run)
+    bool inT = false;
+    bool inRPh = false; // inside <rPh> (phonetic run — ignore text)
+    bool hasRichContent = false;
+    StringBuffer textBuf = StringBuffer();
+    StringBuffer? richXmlBuf; // collects raw XML for rich <si> elements
+
+    // For rich text, we need to find the raw XML of the <si> element.
+    // We'll track whether we see <r> inside <si> and if so, extract the
+    // substring from xmlStr between <si> start and </si> end.
+    // But event-based parsing doesn't give us offsets, so we reconstruct.
+
+    for (final event in parseEvents(xmlStr)) {
+      if (event is XmlStartElementEvent) {
+        switch (event.name) {
+          case 'si':
+            inSi = true;
+            hasRichContent = false;
+            textBuf.clear();
+            richXmlBuf = null;
+          case 'r':
+            if (inSi) {
+              if (!hasRichContent) {
+                hasRichContent = true;
+                richXmlBuf = StringBuffer();
+                richXmlBuf.write('<si>');
+                // If there was a preceding text we already collected, that's
+                // part of the <si> too — but for simple parsing we'll just
+                // start the rich XML buffer now.
+              }
+              inR = true;
+              richXmlBuf!.write(event.toString());
+            }
+          case 'rPh':
+            if (inSi) {
+              inRPh = true;
+              richXmlBuf?.write(event.toString());
+            }
+          case 't':
+            if (inSi) {
+              inT = true;
+              richXmlBuf?.write(event.toString());
+            }
+          default:
+            // Reconstruct rich XML for other elements (rPr, b, i, sz, etc.)
+            richXmlBuf?.write(event.toString());
+        }
+      } else if (event is XmlEndElementEvent) {
+        switch (event.name) {
+          case 'si':
+            if (inSi) {
+              if (hasRichContent && richXmlBuf != null) {
+                richXmlBuf.write('</si>');
+                // Parse just this one <si> as DOM for rich text support
+                final siElement = XmlDocument.parse(richXmlBuf.toString())
+                    .rootElement;
+                final ss = SharedString(node: siElement);
+                _excel._sharedStrings.add(ss, ss.stringValue);
+              } else {
+                // Simple string — no DOM needed
+                final val = textBuf.toString();
+                _excel._sharedStrings
+                    .add(SharedString._fromText(val), val);
+              }
+              inSi = false;
+            }
+          case 'r':
+            if (inR) {
+              inR = false;
+              richXmlBuf?.write('</r>');
+            }
+          case 'rPh':
+            if (inRPh) {
+              inRPh = false;
+              richXmlBuf?.write('</rPh>');
+            }
+          case 't':
+            if (inT) {
+              inT = false;
+              richXmlBuf?.write('</t>');
+            }
+          default:
+            richXmlBuf?.write(event.toString());
+        }
+      } else if (event is XmlTextEvent) {
+        if (inT && inSi) {
+          if (!inRPh) {
+            textBuf.write(event.value);
+          }
+          richXmlBuf?.write(_escapeXmlText(event.value));
+        } else {
+          richXmlBuf?.write(_escapeXmlText(event.value));
+        }
+      }
+    }
+  }
+
+  static String _escapeXmlText(String input) {
+    return input
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
   }
 
   dynamic _nodeChildren(XmlElement node, String child, {var attribute}) {

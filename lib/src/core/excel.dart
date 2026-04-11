@@ -37,6 +37,16 @@ class Excel {
   final Map<String, XmlElement> _pendingSheetNodes = {};
 
   List<CellStyle> _cellStyleList = [];
+  Map<CellStyle, int>? _cellStyleIndex; // lazy reverse lookup
+
+  /// O(1) lookup for cell style position in _cellStyleList.
+  int _cellStyleIndexOf(CellStyle style) {
+    _cellStyleIndex ??= {
+      for (var i = 0; i < _cellStyleList.length; i++)
+        _cellStyleList[i]: i,
+    };
+    return _cellStyleIndex![style] ?? -1;
+  }
   List<String> _patternFill = [];
   final List<String> _mergeChangeLook = [];
   final List<String> _rtlChangeLook = [];

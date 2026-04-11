@@ -12,6 +12,7 @@ mixin _ParserStylesMixin on _ParserBase {
       _excel._fontStyleList = <_FontStyle>[];
       _excel._patternFill = <String>[];
       _excel._cellStyleList = <CellStyle>[];
+      _excel._cellStyleIndex = null; // invalidate reverse lookup
       _excel._borderSetList = <_BorderSet>[];
 
       Iterable<XmlElement> fontList = document.findAllElements('font');

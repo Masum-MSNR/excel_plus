@@ -32,26 +32,6 @@ int lettersToNumeric(String letters) {
   return sum;
 }
 
-Iterable<XmlElement> _findRows(XmlElement table) {
-  return table.findElements('row');
-}
-
-Iterable<XmlElement> _findCells(XmlElement row) {
-  return row.findElements('c');
-}
-
-int? _getCellNumber(XmlElement cell) {
-  var r = cell.getAttribute('r');
-  if (r == null) {
-    return null;
-  }
-  return _cellCoordsFromCellId(r).$2;
-}
-
-int? _getRowNumber(XmlElement row) {
-  return int.tryParse(row.getAttribute('r').toString());
-}
-
 int _letterOnly(int rune) {
   if (65 <= rune && rune <= 90) {
     return rune;
