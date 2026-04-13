@@ -25,7 +25,7 @@ Flutter app for testing `excel_plus` on real Android devices and emulators.
 ## Manual Testing (UI)
 
 ```bash
-cd example_app
+cd example
 flutter run
 ```
 
@@ -46,7 +46,7 @@ flutter devices
 ### Run all integration tests
 
 ```bash
-cd example_app
+cd example
 
 # On a connected device/emulator:
 flutter test integration_test/excel_test.dart
@@ -58,7 +58,7 @@ flutter test integration_test/excel_test.dart -d emulator-5554
 ### Run with `flutter drive` (for CI / machine-readable output)
 
 ```bash
-cd example_app
+cd example
 flutter drive \
   --driver=test_driver/integration_test.dart \
   --target=integration_test/excel_test.dart \
@@ -81,7 +81,7 @@ jobs:
         with:
           api-level: 34
           script: |
-            cd example_app
+            cd example
             flutter test integration_test/excel_test.dart
 ```
 

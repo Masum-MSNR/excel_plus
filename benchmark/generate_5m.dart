@@ -17,6 +17,6 @@ void main() {
   }
   print('Saving...');
   var bytes = excel.encode()!;
-  File('benchmark_5m_data.xlsx').writeAsBytesSync(bytes);
-  print('Done: benchmark_5m_data.xlsx (${(bytes.length / 1024 / 1024).toStringAsFixed(1)} MB)');
+  File('.tmp/benchmark_5m_data.xlsx').writeAsBytesSync(bytes);
+  print('Done: .tmp/benchmark_5m_data.xlsx (${(bytes.length / 1024 / 1024).toStringAsFixed(1)} MB)');
 }
