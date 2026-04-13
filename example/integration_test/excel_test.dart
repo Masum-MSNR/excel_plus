@@ -54,17 +54,19 @@ void main() {
       }
 
       // Summary
-      final totalMs = state.results.values
-          .fold(0, (sum, r) => sum + (r?.durationMs ?? 0));
       expect(state.failCount, 0,
           reason:
               '${state.failCount} test(s) failed out of ${allTests.length}');
 
+      // Print the full human-readable report
+      final report = state.generateReport();
       debugPrint('');
-      debugPrint('══════════════════════════════════════');
-      debugPrint('  RESULTS: ${state.passCount} passed, ${state.failCount} failed / ${allTests.length} total');
-      debugPrint('  DURATION: ${totalMs}ms (${(totalMs / 1000).toStringAsFixed(1)}s)');
-      debugPrint('══════════════════════════════════════');
+      debugPrint(report);
+
+      // Verify report was saved to device
+      expect(state.lastReportPath, isNotNull,
+          reason: 'Test report should have been saved to device');
+      debugPrint('Report saved to: ${state.lastReportPath}');
     });
   });
 }
