@@ -104,12 +104,4 @@ extension BoolParsing on String {
 
     throw '"$this" can not be parsed to boolean.';
   }
-
-  String simplifyText() {
-    String value = replaceAll('&amp', '&');
-    value = value.replaceAll('amp', '&');
-    value = value.replaceAll('&', '&amp;');
-    value = value.replaceAll('"', '&quot;');
-    return value;
-  }
 }
