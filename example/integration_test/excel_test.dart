@@ -41,19 +41,30 @@ void main() {
       for (final test in allTests) {
         final result = state.results[test.name];
         expect(result, isNotNull, reason: '${test.name} has no result');
-        expect(result!.passed, isTrue,
+
+        final status = result!.passed ? 'PASS' : 'FAIL';
+        final mem = result.peakMemoryKB != null
+            ? ' | mem: ${result.peakMemoryKB}KB'
+            : '';
+        debugPrint(
+            '[$status] ${test.name} — ${result.durationMs}ms$mem | ${result.message}');
+
+        expect(result.passed, isTrue,
             reason: '${test.name} FAILED: ${result.message}');
       }
 
       // Summary
+      final totalMs = state.results.values
+          .fold(0, (sum, r) => sum + (r?.durationMs ?? 0));
       expect(state.failCount, 0,
           reason:
               '${state.failCount} test(s) failed out of ${allTests.length}');
 
-      debugPrint('==============================');
-      debugPrint('ALL ${state.passCount} TESTS PASSED');
-      debugPrint('Total duration: ${state.results.values.fold(0, (sum, r) => sum + (r?.durationMs ?? 0))}ms');
-      debugPrint('==============================');
+      debugPrint('');
+      debugPrint('══════════════════════════════════════');
+      debugPrint('  RESULTS: ${state.passCount} passed, ${state.failCount} failed / ${allTests.length} total');
+      debugPrint('  DURATION: ${totalMs}ms (${(totalMs / 1000).toStringAsFixed(1)}s)');
+      debugPrint('══════════════════════════════════════');
     });
   });
 }
