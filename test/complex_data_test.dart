@@ -2,6 +2,8 @@ import 'dart:math';
 import 'package:excel_plus/excel_plus.dart';
 import 'package:test/test.dart';
 
+import 'test_helper.dart';
+
 /// Column layout (50 columns total):
 ///   0-5   : Text (various strings, special chars)
 ///   6-11  : Int (positive, negative, zero, large)
@@ -167,6 +169,7 @@ void main() {
 
       // Roundtrip
       final bytes = excel.save()!;
+      saveTestOutput(bytes, 'complex_mixed_types_styles');
       final decoded = Excel.decodeBytes(bytes);
       final readSheet = decoded['ComplexData'];
 
@@ -222,6 +225,7 @@ void main() {
       }
 
       final bytes = excel.save()!;
+      saveTestOutput(bytes, 'complex_styles_roundtrip');
       final decoded = Excel.decodeBytes(bytes);
       final readSheet = decoded['StyledData'];
 
@@ -333,6 +337,7 @@ void main() {
       }
 
       final bytes = excel.save()!;
+      saveTestOutput(bytes, 'complex_multi_sheet');
       final decoded = Excel.decodeBytes(bytes);
 
       expect(decoded.sheets.containsKey('Sheet_0'), true);
@@ -400,6 +405,7 @@ void main() {
       }
 
       final bytes = excel.save()!;
+      saveTestOutput(bytes, 'complex_header_merged');
       final decoded = Excel.decodeBytes(bytes);
       final readSheet = decoded['HeaderTest'];
 

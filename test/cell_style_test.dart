@@ -1,6 +1,8 @@
 import 'package:excel_plus/excel_plus.dart';
 import 'package:test/test.dart';
 
+import 'test_helper.dart';
+
 void main() {
   group('CellStyle roundtrip', () {
     test('Bold and italic roundtrip', () {
@@ -20,6 +22,7 @@ void main() {
           CellStyle(bold: true, italic: true);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_bold_italic');
       var decoded = Excel.decodeBytes(bytes!);
       var s = decoded['Sheet1'];
 
@@ -39,6 +42,7 @@ void main() {
           CellStyle(fontSize: 24);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_font_size');
       var decoded = Excel.decodeBytes(bytes!);
       expect(
           decoded['Sheet1']
@@ -56,6 +60,7 @@ void main() {
           CellStyle(fontColorHex: ExcelColor.red);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_font_color');
       var decoded = Excel.decodeBytes(bytes!);
       var style =
           decoded['Sheet1'].cell(CellIndex.indexByString('A1')).cellStyle;
@@ -71,6 +76,7 @@ void main() {
           CellStyle(backgroundColorHex: ExcelColor.yellow);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_background_color');
       var decoded = Excel.decodeBytes(bytes!);
       var style =
           decoded['Sheet1'].cell(CellIndex.indexByString('A1')).cellStyle;
@@ -87,6 +93,7 @@ void main() {
       );
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_alignment');
       var decoded = Excel.decodeBytes(bytes!);
       var style =
           decoded['Sheet1'].cell(CellIndex.indexByString('A1')).cellStyle;
@@ -102,6 +109,7 @@ void main() {
           CellStyle(textWrapping: TextWrapping.WrapText);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_text_wrapping');
       var decoded = Excel.decodeBytes(bytes!);
       var style =
           decoded['Sheet1'].cell(CellIndex.indexByString('A1')).cellStyle;
@@ -117,6 +125,7 @@ void main() {
           CellStyle(underline: Underline.Single);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_underline');
       var decoded = Excel.decodeBytes(bytes!);
       var style =
           decoded['Sheet1'].cell(CellIndex.indexByString('A1')).cellStyle;
@@ -136,6 +145,7 @@ void main() {
       );
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_borders');
       var decoded = Excel.decodeBytes(bytes!);
       var style =
           decoded['Sheet1'].cell(CellIndex.indexByString('A1')).cellStyle;
@@ -164,6 +174,7 @@ void main() {
           CellStyle(rotation: 45);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_rotation');
       var decoded = Excel.decodeBytes(bytes!);
       var style =
           decoded['Sheet1'].cell(CellIndex.indexByString('A1')).cellStyle;
@@ -187,6 +198,7 @@ void main() {
       );
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'style_combined');
       var decoded = Excel.decodeBytes(bytes!);
       var style =
           decoded['Sheet1'].cell(CellIndex.indexByString('A1')).cellStyle;

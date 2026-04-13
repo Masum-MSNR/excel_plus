@@ -2,11 +2,14 @@ import 'dart:io';
 import 'package:excel_plus/excel_plus.dart';
 import 'package:test/test.dart';
 
+import 'test_helper.dart';
+
 void main() {
   group('Excel basic operations', () {
     test('Create new excel file', () {
       var excel = Excel.createExcel();
       expect(excel.sheets, isNotEmpty);
+      saveTestOutput(excel.save(), 'basic_create_new');
     });
 
     test('Read and write cell value', () {
@@ -19,6 +22,7 @@ void main() {
       var value = sheet.cell(CellIndex.indexByString('A1')).value;
       expect(value, isA<TextCellValue>());
       expect((value as TextCellValue).value.toString(), 'test');
+      saveTestOutput(excel.save(), 'basic_read_write');
     });
 
     test('Data class properties', () {
@@ -30,6 +34,7 @@ void main() {
       expect(data.columnIndex, 2);
       expect(data.sheetName, 'TestSheet');
       expect(data.cellIndex, CellIndex.indexByString('C5'));
+      saveTestOutput(excel.save(), 'basic_data_class');
     });
 
     test('Data.setFormula', () {
@@ -41,6 +46,7 @@ void main() {
       cell.setFormula('SUM(A1:A2)');
       expect(cell.value, isA<FormulaCellValue>());
       expect((cell.value as FormulaCellValue).formula, 'SUM(A1:A2)');
+      saveTestOutput(excel.save(), 'basic_set_formula');
     });
 
     test('CellIndex factories', () {
@@ -65,22 +71,19 @@ void main() {
       sheet.updateCell(CellIndex.indexByString('A4'), DoubleCellValue(5.5));
       sheet.updateCell(CellIndex.indexByString('A5'), DoubleCellValue(2.0));
 
-      // SUM
       sheet.updateCell(
           CellIndex.indexByString('B1'), FormulaCellValue('SUM(A1:A3)'));
-      // AVERAGE
       sheet.updateCell(
           CellIndex.indexByString('B2'), FormulaCellValue('AVERAGE(A1:A5)'));
-      // COUNT
       sheet.updateCell(
           CellIndex.indexByString('B3'), FormulaCellValue('COUNT(A1:A5)'));
-      // MIN / MAX
       sheet.updateCell(
           CellIndex.indexByString('B4'), FormulaCellValue('MIN(A1:A5)'));
       sheet.updateCell(
           CellIndex.indexByString('B5'), FormulaCellValue('MAX(A1:A5)'));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'formula_math');
       var decoded = Excel.decodeBytes(bytes!);
       var s = decoded['Sheet1'];
 
@@ -103,7 +106,6 @@ void main() {
       sheet.updateCell(CellIndex.indexByString('A1'), IntCellValue(100));
       sheet.updateCell(CellIndex.indexByString('A2'), IntCellValue(50));
 
-      // Basic arithmetic
       sheet.updateCell(
           CellIndex.indexByString('B1'), FormulaCellValue('A1+A2'));
       sheet.updateCell(
@@ -112,20 +114,15 @@ void main() {
           CellIndex.indexByString('B3'), FormulaCellValue('A1*A2'));
       sheet.updateCell(
           CellIndex.indexByString('B4'), FormulaCellValue('A1/A2'));
-
-      // IF
       sheet.updateCell(CellIndex.indexByString('B5'),
           FormulaCellValue('IF(A1>A2,"bigger","smaller")'));
-
-      // Nested
       sheet.updateCell(CellIndex.indexByString('B6'),
           FormulaCellValue('ROUND(AVERAGE(A1:A2),2)'));
-
-      // CONCATENATE
       sheet.updateCell(CellIndex.indexByString('B7'),
           FormulaCellValue('CONCATENATE("Total: ",A1+A2)'));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'formula_arithmetic_logical');
       var decoded = Excel.decodeBytes(bytes!);
       var s = decoded['Sheet1'];
 
@@ -156,6 +153,7 @@ void main() {
       cell.setFormula('SUM(A1:A2)');
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'formula_set_formula');
       var decoded = Excel.decodeBytes(bytes!);
       var val = decoded['Sheet1'].cell(CellIndex.indexByString('A3')).value;
       expect(val, isA<FormulaCellValue>());
@@ -170,6 +168,7 @@ void main() {
           FormulaCellValue("Data!A1*2"));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'formula_cross_sheet');
       var decoded = Excel.decodeBytes(bytes!);
       expect(
           (decoded['Summary'].cell(CellIndex.indexByString('A1')).value
@@ -196,6 +195,7 @@ void main() {
       sheet.updateCell(CellIndex.indexByString('C2'), DoubleCellValue(0.0));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'cellvalue_mixed_types');
       expect(bytes, isNotNull);
 
       var decoded = Excel.decodeBytes(bytes!);
@@ -261,6 +261,7 @@ void main() {
       );
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'cellvalue_date');
       var decoded = Excel.decodeBytes(bytes!);
       var val = decoded['Sheet1'].cell(CellIndex.indexByString('A1')).value;
       expect(val, isA<DateCellValue>());
@@ -279,6 +280,7 @@ void main() {
       );
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'cellvalue_time');
       var decoded = Excel.decodeBytes(bytes!);
       var val = decoded['Sheet1'].cell(CellIndex.indexByString('A1')).value;
       expect(val, isA<TimeCellValue>());
@@ -298,6 +300,7 @@ void main() {
       );
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'cellvalue_datetime');
       var decoded = Excel.decodeBytes(bytes!);
       var val = decoded['Sheet1'].cell(CellIndex.indexByString('A1')).value;
       expect(val, isA<DateTimeCellValue>());
@@ -316,6 +319,7 @@ void main() {
       sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('data'));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'cellvalue_null');
       var decoded = Excel.decodeBytes(bytes!);
       var val = decoded['Sheet1'].cell(CellIndex.indexByString('B1')).value;
       expect(val, isNull);
@@ -334,6 +338,7 @@ void main() {
           CellIndex.indexByString('A4'), TextCellValue('Emoji: \u{1F600}'));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'cellvalue_special_chars');
       var decoded = Excel.decodeBytes(bytes!);
       var s = decoded['Sheet1'];
 
@@ -373,6 +378,7 @@ void main() {
       }
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'cellvalue_many_rows_cols');
       var decoded = Excel.decodeBytes(bytes!);
       var s = decoded['Sheet1'];
 
@@ -398,6 +404,7 @@ void main() {
       expect(excel.tables['Sheet1']!.maxColumns, equals(3));
       expect(excel.tables['Sheet1']!.rows[1][1]!.value.toString(),
           equals('Washington'));
+      saveTestOutput(excel.save(), 'read_example');
     });
 
     test('Read data types from MS Excel 365', () {
@@ -414,6 +421,7 @@ void main() {
           equals(BoolCellValue(true)));
       expect(excel.tables['Tabelle1']?.rows[8][1]?.value,
           equals(BoolCellValue(false)));
+      saveTestOutput(excel.save(), 'read_ms_excel_365');
     });
 
     test('Read + encode + decode roundtrip on existing file', () {
@@ -427,6 +435,7 @@ void main() {
       );
 
       var encoded = excel.encode();
+      saveTestOutput(encoded, 'read_roundtrip_existing');
       expect(encoded, isNotNull);
       var decoded = Excel.decodeBytes(encoded!);
 
@@ -448,6 +457,7 @@ void main() {
       var excel = Excel.decodeBytes(bytes);
       var sheet = excel.tables.values.first;
       expect(sheet.spannedItems, isNotEmpty);
+      saveTestOutput(excel.save(), 'read_spanned');
     });
 
     test('Read borders.xlsx', () {
@@ -455,6 +465,7 @@ void main() {
       var bytes = File(file).readAsBytesSync();
       var excel = Excel.decodeBytes(bytes);
       expect(excel.tables, isNotEmpty);
+      saveTestOutput(excel.save(), 'read_borders');
     });
 
     test('Read columnWidthRowHeight.xlsx', () {
@@ -462,6 +473,7 @@ void main() {
       var bytes = File(file).readAsBytesSync();
       var excel = Excel.decodeBytes(bytes);
       expect(excel.tables, isNotEmpty);
+      saveTestOutput(excel.save(), 'read_column_width_row_height');
     });
 
     test('Read data types from Google Spreadsheet', () {
@@ -469,6 +481,7 @@ void main() {
       var bytes = File(file).readAsBytesSync();
       var excel = Excel.decodeBytes(bytes);
       expect(excel.tables, isNotEmpty);
+      saveTestOutput(excel.save(), 'read_google_spreadsheet');
     });
 
     test('Read data types from LibreOffice', () {
@@ -476,6 +489,7 @@ void main() {
       var bytes = File(file).readAsBytesSync();
       var excel = Excel.decodeBytes(bytes);
       expect(excel.tables, isNotEmpty);
+      saveTestOutput(excel.save(), 'read_libreoffice');
     });
   });
 }

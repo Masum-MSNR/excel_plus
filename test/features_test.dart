@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:excel_plus/excel_plus.dart';
 import 'package:test/test.dart';
 
+import 'test_helper.dart';
+
 void main() {
   group('Column width and row height', () {
     test('setColumnWidth/getColumnWidth', () {
@@ -12,6 +14,7 @@ void main() {
 
       expect(sheet.getColumnWidth(0), 25.0);
       expect(sheet.getColumnWidth(2), 50.0);
+      saveTestOutput(excel.save(), 'dim_column_width');
     });
 
     test('setRowHeight/getRowHeight', () {
@@ -22,6 +25,7 @@ void main() {
 
       expect(sheet.getRowHeight(0), 30.0);
       expect(sheet.getRowHeight(3), 60.0);
+      saveTestOutput(excel.save(), 'dim_row_height');
     });
 
     test('Column width roundtrip', () {
@@ -31,6 +35,7 @@ void main() {
       sheet.setColumnWidth(0, 25.0);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'dim_column_width_roundtrip');
       var decoded = Excel.decodeBytes(bytes!);
       expect(decoded['Sheet1'].getColumnWidth(0), closeTo(25.0, 0.01));
     });
@@ -42,6 +47,7 @@ void main() {
       sheet.setRowHeight(0, 40.0);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'dim_row_height_roundtrip');
       var decoded = Excel.decodeBytes(bytes!);
       expect(decoded['Sheet1'].getRowHeight(0), closeTo(40.0, 0.01));
     });
@@ -57,6 +63,7 @@ void main() {
 
       sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('d'));
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'dim_defaults');
       var decoded = Excel.decodeBytes(bytes!);
       expect(decoded['Sheet1'].defaultColumnWidth, closeTo(15.0, 0.01));
       expect(decoded['Sheet1'].defaultRowHeight, closeTo(20.0, 0.01));
@@ -69,6 +76,7 @@ void main() {
           CellIndex.indexByString('A1'), TextCellValue('Some text'));
       sheet.setColumnAutoFit(0);
       expect(sheet.getColumnAutoFit(0), true);
+      saveTestOutput(excel.save(), 'dim_auto_fit');
     });
   });
 
@@ -87,6 +95,7 @@ void main() {
       expect(sheet.cell(CellIndex.indexByString('A2')).value.toString(),
           'hi world');
       expect(sheet.cell(CellIndex.indexByString('A3')).value.toString(), 'bye');
+      saveTestOutput(excel.save(), 'findreplace_basic');
     });
 
     test('findAndReplace with first limit', () {
@@ -98,6 +107,7 @@ void main() {
 
       int count = sheet.findAndReplace('abc', 'xyz', first: 1);
       expect(count, 1);
+      saveTestOutput(excel.save(), 'findreplace_first_limit');
     });
   });
 
@@ -117,6 +127,7 @@ void main() {
       expect(range.length, 2);
       expect(range[0]?[0]?.value.toString(), 'center');
       expect((range[1]?[1]?.value as IntCellValue).value, 42);
+      saveTestOutput(excel.save(), 'range_select');
     });
 
     test('selectRangeWithString', () {
@@ -130,6 +141,7 @@ void main() {
       expect(range.length, 2);
       expect(range[0]?[0]?.value.toString(), 'a1');
       expect(range[1]?[1]?.value.toString(), 'b2');
+      saveTestOutput(excel.save(), 'range_select_string');
     });
 
     test('selectRangeValues', () {
@@ -145,6 +157,7 @@ void main() {
 
       expect(values, isNotNull);
       expect(values.length, 1);
+      saveTestOutput(excel.save(), 'range_select_values');
     });
   });
 
@@ -162,6 +175,7 @@ void main() {
       expect(sheet.headerFooter?.oddHeader, '&CPage Header');
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'headerfooter_roundtrip');
       var decoded = Excel.decodeBytes(bytes!);
       var hf = decoded['Sheet1'].headerFooter;
       expect(hf, isNotNull);

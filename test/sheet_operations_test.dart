@@ -1,6 +1,8 @@
 import 'package:excel_plus/excel_plus.dart';
 import 'package:test/test.dart';
 
+import 'test_helper.dart';
+
 void main() {
   group('Sheet operations', () {
     test('Multiple sheets roundtrip', () {
@@ -11,6 +13,7 @@ void main() {
           .updateCell(CellIndex.indexByString('B2'), IntCellValue(99));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'sheet_multiple_roundtrip');
       var decoded = Excel.decodeBytes(bytes!);
 
       expect(decoded.sheets.keys, contains('SheetA'));
@@ -44,6 +47,7 @@ void main() {
           'data');
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'sheet_rename');
       var decoded = Excel.decodeBytes(bytes!);
       expect(decoded.sheets.keys, contains('Renamed'));
       expect(decoded.sheets.keys, isNot(contains('Original')));
@@ -61,6 +65,7 @@ void main() {
       expect(excel.sheets.keys, isNot(contains('Remove')));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'sheet_delete');
       var decoded = Excel.decodeBytes(bytes!);
       expect(decoded.sheets.keys, isNot(contains('Remove')));
     });
@@ -79,6 +84,7 @@ void main() {
               .value
               .toString(),
           'original');
+      saveTestOutput(excel.save(), 'sheet_copy');
     });
 
     test('Default sheet get/set', () {
@@ -91,6 +97,7 @@ void main() {
       var result = excel.setDefaultSheet('Second');
       expect(result, true);
       expect(excel.getDefaultSheet(), 'Second');
+      saveTestOutput(excel.save(), 'sheet_default');
     });
 
     test('Sheet maxRows/maxColumns', () {
@@ -99,12 +106,14 @@ void main() {
       sheet.updateCell(CellIndex.indexByString('C5'), TextCellValue('val'));
       expect(sheet.maxRows, 5);
       expect(sheet.maxColumns, 3);
+      saveTestOutput(excel.save(), 'sheet_max_rows_cols');
     });
 
     test('Sheet sheetName', () {
       var excel = Excel.createExcel();
       var sheet = excel['MySheet'];
       expect(sheet.sheetName, 'MySheet');
+      saveTestOutput(excel.save(), 'sheet_name');
     });
 
     test('Sheet rows getter', () {
@@ -117,6 +126,7 @@ void main() {
       expect(rows.length, 2);
       expect(rows[0][0]?.value.toString(), 'r0c0');
       expect(rows[1][1]?.value.toString(), 'r1c1');
+      saveTestOutput(excel.save(), 'sheet_rows_getter');
     });
 
     test('Sheet row(int) method', () {
@@ -129,6 +139,7 @@ void main() {
       expect(r[0]?.value.toString(), 'val');
       expect(r[1], isNull);
       expect((r[2]?.value as IntCellValue).value, 42);
+      saveTestOutput(excel.save(), 'sheet_row_method');
     });
 
     test('RTL roundtrip', () {
@@ -138,6 +149,7 @@ void main() {
       sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('rtl'));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'sheet_rtl');
       var decoded = Excel.decodeBytes(bytes!);
       expect(decoded['RTLSheet'].isRTL, true);
     });
@@ -160,6 +172,7 @@ void main() {
           'row1');
       expect(sheet.cell(CellIndex.indexByString('A4')).value.toString(),
           'row2');
+      saveTestOutput(excel.save(), 'rowcol_insert_row');
     });
 
     test('removeRow shifts data up', () {
@@ -175,6 +188,7 @@ void main() {
           'row0');
       expect(sheet.cell(CellIndex.indexByString('A2')).value.toString(),
           'row2');
+      saveTestOutput(excel.save(), 'rowcol_remove_row');
     });
 
     test('insertColumn shifts data right', () {
@@ -193,6 +207,7 @@ void main() {
           'col1');
       expect(sheet.cell(CellIndex.indexByString('D1')).value.toString(),
           'col2');
+      saveTestOutput(excel.save(), 'rowcol_insert_col');
     });
 
     test('removeColumn shifts data left', () {
@@ -208,6 +223,7 @@ void main() {
           'col0');
       expect(sheet.cell(CellIndex.indexByString('B1')).value.toString(),
           'col2');
+      saveTestOutput(excel.save(), 'rowcol_remove_col');
     });
 
     test('appendRow', () {
@@ -223,6 +239,7 @@ void main() {
               .value,
           1);
       expect(sheet.cell(CellIndex.indexByString('C2')).value, isNull);
+      saveTestOutput(excel.save(), 'rowcol_append_row');
     });
 
     test('insertRowIterables', () {
@@ -244,6 +261,7 @@ void main() {
               .value
               .toString(),
           'new1');
+      saveTestOutput(excel.save(), 'rowcol_insert_iterables');
     });
 
     test('insertRowIterables with startingColumn', () {
@@ -265,6 +283,7 @@ void main() {
               .value
               .toString(),
           'y');
+      saveTestOutput(excel.save(), 'rowcol_insert_iterables_offset');
     });
 
     test('clearRow', () {
@@ -279,6 +298,7 @@ void main() {
           'keep');
       expect(sheet.cell(CellIndex.indexByString('A2')).value, isNull);
       expect(sheet.cell(CellIndex.indexByString('B2')).value, isNull);
+      saveTestOutput(excel.save(), 'rowcol_clear_row');
     });
 
     test('Row/column operations roundtrip', () {
@@ -290,6 +310,7 @@ void main() {
       sheet.insertRow(1);
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'rowcol_roundtrip');
       var decoded = Excel.decodeBytes(bytes!);
       var s = decoded['Sheet1'];
       expect(s.cell(CellIndex.indexByString('A1')).value.toString(), 'r0');
@@ -308,6 +329,7 @@ void main() {
       expect(sheet.spannedItems, contains('A1:C3'));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'merge_roundtrip');
       var decoded = Excel.decodeBytes(bytes!);
       var s = decoded['Sheet1'];
       expect(s.spannedItems, contains('A1:C3'));
@@ -322,6 +344,7 @@ void main() {
           CellIndex.indexByString('A5'), CellIndex.indexByString('A10'));
 
       var bytes = excel.encode();
+      saveTestOutput(bytes, 'merge_multiple');
       var decoded = Excel.decodeBytes(bytes!);
       var s = decoded['Sheet1'];
       expect(s.spannedItems, contains('A1:B2'));
@@ -337,6 +360,7 @@ void main() {
 
       sheet.unMerge('A1:C3');
       expect(sheet.spannedItems, isNot(contains('A1:C3')));
+      saveTestOutput(excel.save(), 'merge_unmerge');
     });
 
     test('getMergedCells via Excel class', () {
@@ -349,6 +373,7 @@ void main() {
       var merged = excel.getMergedCells('Sheet1');
       expect(merged, contains('A1:B2'));
       expect(merged, contains('D4:E5'));
+      saveTestOutput(excel.save(), 'merge_get_merged');
     });
 
     test('Merge with custom value', () {
@@ -359,6 +384,7 @@ void main() {
 
       expect(sheet.cell(CellIndex.indexByString('A1')).value.toString(),
           'Merged Header');
+      saveTestOutput(excel.save(), 'merge_custom_value');
     });
   });
 }
