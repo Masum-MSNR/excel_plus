@@ -54,6 +54,131 @@ void main() {
     });
   });
 
+  group('Formula roundtrip', () {
+    test('Math formulas roundtrip', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+
+      sheet.updateCell(CellIndex.indexByString('A1'), IntCellValue(10));
+      sheet.updateCell(CellIndex.indexByString('A2'), IntCellValue(20));
+      sheet.updateCell(CellIndex.indexByString('A3'), IntCellValue(30));
+      sheet.updateCell(CellIndex.indexByString('A4'), DoubleCellValue(5.5));
+      sheet.updateCell(CellIndex.indexByString('A5'), DoubleCellValue(2.0));
+
+      // SUM
+      sheet.updateCell(
+          CellIndex.indexByString('B1'), FormulaCellValue('SUM(A1:A3)'));
+      // AVERAGE
+      sheet.updateCell(
+          CellIndex.indexByString('B2'), FormulaCellValue('AVERAGE(A1:A5)'));
+      // COUNT
+      sheet.updateCell(
+          CellIndex.indexByString('B3'), FormulaCellValue('COUNT(A1:A5)'));
+      // MIN / MAX
+      sheet.updateCell(
+          CellIndex.indexByString('B4'), FormulaCellValue('MIN(A1:A5)'));
+      sheet.updateCell(
+          CellIndex.indexByString('B5'), FormulaCellValue('MAX(A1:A5)'));
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      var s = decoded['Sheet1'];
+
+      expect((s.cell(CellIndex.indexByString('B1')).value as FormulaCellValue)
+          .formula, 'SUM(A1:A3)');
+      expect((s.cell(CellIndex.indexByString('B2')).value as FormulaCellValue)
+          .formula, 'AVERAGE(A1:A5)');
+      expect((s.cell(CellIndex.indexByString('B3')).value as FormulaCellValue)
+          .formula, 'COUNT(A1:A5)');
+      expect((s.cell(CellIndex.indexByString('B4')).value as FormulaCellValue)
+          .formula, 'MIN(A1:A5)');
+      expect((s.cell(CellIndex.indexByString('B5')).value as FormulaCellValue)
+          .formula, 'MAX(A1:A5)');
+    });
+
+    test('Arithmetic and logical formulas roundtrip', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+
+      sheet.updateCell(CellIndex.indexByString('A1'), IntCellValue(100));
+      sheet.updateCell(CellIndex.indexByString('A2'), IntCellValue(50));
+
+      // Basic arithmetic
+      sheet.updateCell(
+          CellIndex.indexByString('B1'), FormulaCellValue('A1+A2'));
+      sheet.updateCell(
+          CellIndex.indexByString('B2'), FormulaCellValue('A1-A2'));
+      sheet.updateCell(
+          CellIndex.indexByString('B3'), FormulaCellValue('A1*A2'));
+      sheet.updateCell(
+          CellIndex.indexByString('B4'), FormulaCellValue('A1/A2'));
+
+      // IF
+      sheet.updateCell(CellIndex.indexByString('B5'),
+          FormulaCellValue('IF(A1>A2,"bigger","smaller")'));
+
+      // Nested
+      sheet.updateCell(CellIndex.indexByString('B6'),
+          FormulaCellValue('ROUND(AVERAGE(A1:A2),2)'));
+
+      // CONCATENATE
+      sheet.updateCell(CellIndex.indexByString('B7'),
+          FormulaCellValue('CONCATENATE("Total: ",A1+A2)'));
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      var s = decoded['Sheet1'];
+
+      expect((s.cell(CellIndex.indexByString('B1')).value as FormulaCellValue)
+          .formula, 'A1+A2');
+      expect((s.cell(CellIndex.indexByString('B2')).value as FormulaCellValue)
+          .formula, 'A1-A2');
+      expect((s.cell(CellIndex.indexByString('B3')).value as FormulaCellValue)
+          .formula, 'A1*A2');
+      expect((s.cell(CellIndex.indexByString('B4')).value as FormulaCellValue)
+          .formula, 'A1/A2');
+      expect((s.cell(CellIndex.indexByString('B5')).value as FormulaCellValue)
+          .formula, 'IF(A1>A2,"bigger","smaller")');
+      expect((s.cell(CellIndex.indexByString('B6')).value as FormulaCellValue)
+          .formula, 'ROUND(AVERAGE(A1:A2),2)');
+      expect((s.cell(CellIndex.indexByString('B7')).value as FormulaCellValue)
+          .formula, 'CONCATENATE("Total: ",A1+A2)');
+    });
+
+    test('setFormula roundtrip', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+
+      sheet.updateCell(CellIndex.indexByString('A1'), IntCellValue(10));
+      sheet.updateCell(CellIndex.indexByString('A2'), IntCellValue(20));
+
+      var cell = sheet.cell(CellIndex.indexByString('A3'));
+      cell.setFormula('SUM(A1:A2)');
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      var val = decoded['Sheet1'].cell(CellIndex.indexByString('A3')).value;
+      expect(val, isA<FormulaCellValue>());
+      expect((val as FormulaCellValue).formula, 'SUM(A1:A2)');
+    });
+
+    test('Cross-sheet reference formula roundtrip', () {
+      var excel = Excel.createExcel();
+      excel['Data']
+          .updateCell(CellIndex.indexByString('A1'), IntCellValue(42));
+      excel['Summary'].updateCell(CellIndex.indexByString('A1'),
+          FormulaCellValue("Data!A1*2"));
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      expect(
+          (decoded['Summary'].cell(CellIndex.indexByString('A1')).value
+                  as FormulaCellValue)
+              .formula,
+          'Data!A1*2');
+    });
+  });
+
   group('CellValue roundtrip', () {
     test('Text, int, double, bool, formula cells roundtrip', () {
       var excel = Excel.createExcel();
