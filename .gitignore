@@ -8,3 +8,7 @@ pubspec.lock
 
 # Internal docs (analysis, plans — not for distribution)
 docs/
+
+# Temporary/generated files (benchmarks, test outputs)
+.tmp/
+*.xlsx
