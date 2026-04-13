@@ -344,9 +344,9 @@ class Sheet extends _SheetBase with _SheetRowColumnMixin, _SheetMergeMixin {
             sourceData.value.toString().replaceAllMapped(source, (match) {
           if (first == -1 || first != replaceCount) {
             ++replaceCount;
-            return match.input.replaceRange(match.start, match.end, target);
+            return target;
           }
-          return match.input;
+          return match[0]!;
         });
         _sheetData[i]![j]!.value = TextCellValue(result);
       }

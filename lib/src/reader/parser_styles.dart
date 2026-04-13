@@ -138,11 +138,11 @@ mixin _ParserStylesMixin on _ParserBase {
             var underline0 = _nodeChildren(font, 'u', attribute: 'val');
             if (underline0 != null) {
               underline = Underline.Double;
-            }
-
-            var singleUnderline = _nodeChildren(font, 'u');
-            if (singleUnderline != null) {
-              underline = Underline.Single;
+            } else {
+              var singleUnderline = _nodeChildren(font, 'u');
+              if (singleUnderline != null) {
+                underline = Underline.Single;
+              }
             }
 
             var family = _nodeChildren(font, 'name', attribute: 'val');
@@ -186,7 +186,7 @@ mixin _ParserStylesMixin on _ParserBase {
                 textWrapping = TextWrapping.Clip;
               }
 
-              var vertical = node.getAttribute('vertical');
+              var vertical = child.getAttribute('vertical');
               if (vertical != null) {
                 if (vertical.toString() == 'top') {
                   verticalAlign = VerticalAlign.Top;
@@ -195,7 +195,7 @@ mixin _ParserStylesMixin on _ParserBase {
                 }
               }
 
-              var horizontal = node.getAttribute('horizontal');
+              var horizontal = child.getAttribute('horizontal');
               if (horizontal != null) {
                 if (horizontal.toString() == 'center') {
                   horizontalAlign = HorizontalAlign.Center;
@@ -204,7 +204,7 @@ mixin _ParserStylesMixin on _ParserBase {
                 }
               }
 
-              var rotationString = node.getAttribute('textRotation');
+              var rotationString = child.getAttribute('textRotation');
               if (rotationString != null) {
                 rotation = (double.tryParse(rotationString) ?? 0.0).floor();
               }

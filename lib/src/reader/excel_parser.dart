@@ -449,10 +449,10 @@ class Parser extends _ParserBase with _ParserStylesMixin {
                 XmlName('PartName'), '/xl/worksheets/sheet$sheetNumber.xml'),
           ],
         ));
-    if (_excel._xmlFiles['xl/workbook.xml'] != null) {
-      _parseTable(
-          _excel._xmlFiles['xl/workbook.xml']!.findAllElements('sheet').last);
-    }
+    // Set sheetData reference directly — don't re-parse via _parseTable
+    // which would overwrite user-set properties (isRTL, headerFooter, etc.)
+    var sheetData = document.findAllElements('sheetData').first;
+    _excel._sheets[newSheet] = sheetData;
   }
 
   void _parseHeaderFooter(XmlElement worksheet, Sheet sheetObject) {

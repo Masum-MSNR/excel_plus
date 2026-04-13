@@ -48,27 +48,27 @@ class HeaderFooter {
     final children = <XmlNode>[];
     if (evenHeader != null) {
       children.add(XmlElement(
-          XmlName("evenHeader"), [], [XmlText(evenHeader!.simplifyText())]));
+          XmlName("evenHeader"), [], [XmlText(evenHeader!)]));
     }
     if (evenFooter != null) {
       children.add(XmlElement(
-          XmlName("evenFooter"), [], [XmlText(evenFooter!.simplifyText())]));
+          XmlName("evenFooter"), [], [XmlText(evenFooter!)]));
     }
     if (firstHeader != null) {
       children.add(XmlElement(
-          XmlName("firstHeader"), [], [XmlText(firstHeader!.simplifyText())]));
+          XmlName("firstHeader"), [], [XmlText(firstHeader!)]));
     }
     if (firstFooter != null) {
       children.add(XmlElement(
-          XmlName("firstFooter"), [], [XmlText(firstFooter!.simplifyText())]));
+          XmlName("firstFooter"), [], [XmlText(firstFooter!)]));
     }
     if (oddHeader != null) {
       children.add(XmlElement(
-          XmlName("oddHeader"), [], [XmlText(oddHeader!.simplifyText())]));
+          XmlName("oddHeader"), [], [XmlText(oddHeader!)]));
     }
     if (oddFooter != null) {
       children.add(XmlElement(
-          XmlName("oddFooter"), [], [XmlText(oddFooter!.simplifyText())]));
+          XmlName("oddFooter"), [], [XmlText(oddFooter!)]));
     }
 
     return XmlElement(XmlName("headerFooter"), attributes, children);

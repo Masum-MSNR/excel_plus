@@ -1,0 +1,364 @@
+import 'package:excel_plus/excel_plus.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('Sheet operations', () {
+    test('Multiple sheets roundtrip', () {
+      var excel = Excel.createExcel();
+      excel['SheetA']
+          .updateCell(CellIndex.indexByString('A1'), TextCellValue('Alpha'));
+      excel['SheetB']
+          .updateCell(CellIndex.indexByString('B2'), IntCellValue(99));
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+
+      expect(decoded.sheets.keys, contains('SheetA'));
+      expect(decoded.sheets.keys, contains('SheetB'));
+      expect(
+          (decoded['SheetA'].cell(CellIndex.indexByString('A1')).value
+                  as TextCellValue)
+              .value
+              .toString(),
+          'Alpha');
+      expect(
+          (decoded['SheetB'].cell(CellIndex.indexByString('B2')).value
+                  as IntCellValue)
+              .value,
+          99);
+    });
+
+    test('Rename sheet', () {
+      var excel = Excel.createExcel();
+      excel['Original']
+          .updateCell(CellIndex.indexByString('A1'), TextCellValue('data'));
+      excel.rename('Original', 'Renamed');
+
+      expect(excel.sheets.keys, contains('Renamed'));
+      expect(excel.sheets.keys, isNot(contains('Original')));
+      expect(
+          (excel['Renamed'].cell(CellIndex.indexByString('A1')).value
+                  as TextCellValue)
+              .value
+              .toString(),
+          'data');
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      expect(decoded.sheets.keys, contains('Renamed'));
+      expect(decoded.sheets.keys, isNot(contains('Original')));
+    });
+
+    test('Delete sheet', () {
+      var excel = Excel.createExcel();
+      excel['Keep']
+          .updateCell(CellIndex.indexByString('A1'), TextCellValue('keep'));
+      excel['Remove']
+          .updateCell(CellIndex.indexByString('A1'), TextCellValue('remove'));
+      excel.delete('Remove');
+
+      expect(excel.sheets.keys, contains('Keep'));
+      expect(excel.sheets.keys, isNot(contains('Remove')));
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      expect(decoded.sheets.keys, isNot(contains('Remove')));
+    });
+
+    test('Copy sheet', () {
+      var excel = Excel.createExcel();
+      excel['Source'].updateCell(
+          CellIndex.indexByString('A1'), TextCellValue('original'));
+      excel.copy('Source', 'Destination');
+
+      expect(excel.sheets.keys, contains('Source'));
+      expect(excel.sheets.keys, contains('Destination'));
+      expect(
+          (excel['Destination'].cell(CellIndex.indexByString('A1')).value
+                  as TextCellValue)
+              .value
+              .toString(),
+          'original');
+    });
+
+    test('Default sheet get/set', () {
+      var excel = Excel.createExcel();
+      excel['First']
+          .updateCell(CellIndex.indexByString('A1'), TextCellValue('f'));
+      excel['Second']
+          .updateCell(CellIndex.indexByString('A1'), TextCellValue('s'));
+
+      var result = excel.setDefaultSheet('Second');
+      expect(result, true);
+      expect(excel.getDefaultSheet(), 'Second');
+    });
+
+    test('Sheet maxRows/maxColumns', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('C5'), TextCellValue('val'));
+      expect(sheet.maxRows, 5);
+      expect(sheet.maxColumns, 3);
+    });
+
+    test('Sheet sheetName', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['MySheet'];
+      expect(sheet.sheetName, 'MySheet');
+    });
+
+    test('Sheet rows getter', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('r0c0'));
+      sheet.updateCell(CellIndex.indexByString('B2'), TextCellValue('r1c1'));
+
+      var rows = sheet.rows;
+      expect(rows.length, 2);
+      expect(rows[0][0]?.value.toString(), 'r0c0');
+      expect(rows[1][1]?.value.toString(), 'r1c1');
+    });
+
+    test('Sheet row(int) method', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A2'), TextCellValue('val'));
+      sheet.updateCell(CellIndex.indexByString('C2'), IntCellValue(42));
+
+      var r = sheet.row(1);
+      expect(r[0]?.value.toString(), 'val');
+      expect(r[1], isNull);
+      expect((r[2]?.value as IntCellValue).value, 42);
+    });
+
+    test('RTL roundtrip', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['RTLSheet'];
+      sheet.isRTL = true;
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('rtl'));
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      expect(decoded['RTLSheet'].isRTL, true);
+    });
+  });
+
+  group('Row and column operations', () {
+    test('insertRow shifts data down', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('row0'));
+      sheet.updateCell(CellIndex.indexByString('A2'), TextCellValue('row1'));
+      sheet.updateCell(CellIndex.indexByString('A3'), TextCellValue('row2'));
+
+      sheet.insertRow(1);
+
+      expect(sheet.cell(CellIndex.indexByString('A1')).value.toString(),
+          'row0');
+      expect(sheet.cell(CellIndex.indexByString('A2')).value, isNull);
+      expect(sheet.cell(CellIndex.indexByString('A3')).value.toString(),
+          'row1');
+      expect(sheet.cell(CellIndex.indexByString('A4')).value.toString(),
+          'row2');
+    });
+
+    test('removeRow shifts data up', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('row0'));
+      sheet.updateCell(CellIndex.indexByString('A2'), TextCellValue('row1'));
+      sheet.updateCell(CellIndex.indexByString('A3'), TextCellValue('row2'));
+
+      sheet.removeRow(1);
+
+      expect(sheet.cell(CellIndex.indexByString('A1')).value.toString(),
+          'row0');
+      expect(sheet.cell(CellIndex.indexByString('A2')).value.toString(),
+          'row2');
+    });
+
+    test('insertColumn shifts data right', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('col0'));
+      sheet.updateCell(CellIndex.indexByString('B1'), TextCellValue('col1'));
+      sheet.updateCell(CellIndex.indexByString('C1'), TextCellValue('col2'));
+
+      sheet.insertColumn(1);
+
+      expect(sheet.cell(CellIndex.indexByString('A1')).value.toString(),
+          'col0');
+      expect(sheet.cell(CellIndex.indexByString('B1')).value, isNull);
+      expect(sheet.cell(CellIndex.indexByString('C1')).value.toString(),
+          'col1');
+      expect(sheet.cell(CellIndex.indexByString('D1')).value.toString(),
+          'col2');
+    });
+
+    test('removeColumn shifts data left', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('col0'));
+      sheet.updateCell(CellIndex.indexByString('B1'), TextCellValue('col1'));
+      sheet.updateCell(CellIndex.indexByString('C1'), TextCellValue('col2'));
+
+      sheet.removeColumn(1);
+
+      expect(sheet.cell(CellIndex.indexByString('A1')).value.toString(),
+          'col0');
+      expect(sheet.cell(CellIndex.indexByString('B1')).value.toString(),
+          'col2');
+    });
+
+    test('appendRow', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('header'));
+
+      sheet.appendRow([TextCellValue('a'), IntCellValue(1), null]);
+
+      expect(sheet.cell(CellIndex.indexByString('A2')).value.toString(), 'a');
+      expect(
+          (sheet.cell(CellIndex.indexByString('B2')).value as IntCellValue)
+              .value,
+          1);
+      expect(sheet.cell(CellIndex.indexByString('C2')).value, isNull);
+    });
+
+    test('insertRowIterables', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('r0'));
+      sheet.updateCell(CellIndex.indexByString('A2'), TextCellValue('r1'));
+
+      sheet.insertRowIterables(
+          [TextCellValue('new0'), TextCellValue('new1')], 1);
+
+      expect(
+          (sheet.cell(CellIndex.indexByString('A2')).value as TextCellValue)
+              .value
+              .toString(),
+          'new0');
+      expect(
+          (sheet.cell(CellIndex.indexByString('B2')).value as TextCellValue)
+              .value
+              .toString(),
+          'new1');
+    });
+
+    test('insertRowIterables with startingColumn', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.insertRowIterables(
+          [TextCellValue('x'), TextCellValue('y')], 0,
+          startingColumn: 2);
+
+      expect(sheet.cell(CellIndex.indexByString('A1')).value, isNull);
+      expect(sheet.cell(CellIndex.indexByString('B1')).value, isNull);
+      expect(
+          (sheet.cell(CellIndex.indexByString('C1')).value as TextCellValue)
+              .value
+              .toString(),
+          'x');
+      expect(
+          (sheet.cell(CellIndex.indexByString('D1')).value as TextCellValue)
+              .value
+              .toString(),
+          'y');
+    });
+
+    test('clearRow', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('keep'));
+      sheet.updateCell(CellIndex.indexByString('A2'), TextCellValue('clear'));
+      sheet.updateCell(CellIndex.indexByString('B2'), IntCellValue(99));
+
+      sheet.clearRow(1);
+      expect(sheet.cell(CellIndex.indexByString('A1')).value.toString(),
+          'keep');
+      expect(sheet.cell(CellIndex.indexByString('A2')).value, isNull);
+      expect(sheet.cell(CellIndex.indexByString('B2')).value, isNull);
+    });
+
+    test('Row/column operations roundtrip', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('r0'));
+      sheet.updateCell(CellIndex.indexByString('A2'), TextCellValue('r1'));
+      sheet.updateCell(CellIndex.indexByString('A3'), TextCellValue('r2'));
+      sheet.insertRow(1);
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      var s = decoded['Sheet1'];
+      expect(s.cell(CellIndex.indexByString('A1')).value.toString(), 'r0');
+      expect(s.cell(CellIndex.indexByString('A2')).value, isNull);
+      expect(s.cell(CellIndex.indexByString('A3')).value.toString(), 'r1');
+    });
+  });
+
+  group('Merge and unmerge', () {
+    test('Merge cells roundtrip', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.updateCell(CellIndex.indexByString('A1'), TextCellValue('merged'));
+      sheet.merge(CellIndex.indexByString('A1'), CellIndex.indexByString('C3'));
+
+      expect(sheet.spannedItems, contains('A1:C3'));
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      var s = decoded['Sheet1'];
+      expect(s.spannedItems, contains('A1:C3'));
+    });
+
+    test('Multiple merges roundtrip', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.merge(CellIndex.indexByString('A1'), CellIndex.indexByString('B2'));
+      sheet.merge(CellIndex.indexByString('D1'), CellIndex.indexByString('F1'));
+      sheet.merge(
+          CellIndex.indexByString('A5'), CellIndex.indexByString('A10'));
+
+      var bytes = excel.encode();
+      var decoded = Excel.decodeBytes(bytes!);
+      var s = decoded['Sheet1'];
+      expect(s.spannedItems, contains('A1:B2'));
+      expect(s.spannedItems, contains('D1:F1'));
+      expect(s.spannedItems, contains('A5:A10'));
+    });
+
+    test('Unmerge cells', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.merge(CellIndex.indexByString('A1'), CellIndex.indexByString('C3'));
+      expect(sheet.spannedItems, contains('A1:C3'));
+
+      sheet.unMerge('A1:C3');
+      expect(sheet.spannedItems, isNot(contains('A1:C3')));
+    });
+
+    test('getMergedCells via Excel class', () {
+      var excel = Excel.createExcel();
+      excel['Sheet1']
+          .merge(CellIndex.indexByString('A1'), CellIndex.indexByString('B2'));
+      excel['Sheet1']
+          .merge(CellIndex.indexByString('D4'), CellIndex.indexByString('E5'));
+
+      var merged = excel.getMergedCells('Sheet1');
+      expect(merged, contains('A1:B2'));
+      expect(merged, contains('D4:E5'));
+    });
+
+    test('Merge with custom value', () {
+      var excel = Excel.createExcel();
+      var sheet = excel['Sheet1'];
+      sheet.merge(CellIndex.indexByString('A1'), CellIndex.indexByString('C1'),
+          customValue: TextCellValue('Merged Header'));
+
+      expect(sheet.cell(CellIndex.indexByString('A1')).value.toString(),
+          'Merged Header');
+    });
+  });
+}
