@@ -8,19 +8,12 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
     if (_excel._styleChanges) {
       _processStylesFile();
     }
+
     _setSheetElements();
     if (_excel._defaultSheet != null) {
       _setDefaultSheet(_excel._defaultSheet);
     }
     _setSharedStrings();
-
-    if (_excel._mergeChanges) {
-      _setMerge();
-    }
-
-    if (_excel._rtlChanges) {
-      _setRTL();
-    }
 
     for (var xmlFile in _excel._xmlFiles.keys) {
       if (_archiveFiles.containsKey(xmlFile)) continue;
@@ -145,129 +138,100 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
     sheetXmlElement.children.add(sheet.headerFooter!.toXmlElement());
   }
 
-  /// Writing the merged cells information into the excel properties files.
-  void _setMerge() {
-    _selfCorrectSpanMap(_excel);
-    for (var s in _excel._mergeChangeLook) {
-      if (_excel._sheetMap[s] != null &&
-          _excel._sheetMap[s]!._spanList.isNotEmpty &&
-          _excel._xmlSheetId.containsKey(s) &&
-          _excel._xmlFiles.containsKey(_excel._xmlSheetId[s])) {
-        Iterable<XmlElement>? iterMergeElement = _excel
-            ._xmlFiles[_excel._xmlSheetId[s]]
-            ?.findAllElements('mergeCells');
-        late XmlElement mergeElement;
-        if (iterMergeElement?.isNotEmpty ?? false) {
-          mergeElement = iterMergeElement!.first;
-        } else {
-          if ((_excel._xmlFiles[_excel._xmlSheetId[s]]
-                      ?.findAllElements('worksheet')
-                      .length ??
-                  0) >
-              0) {
-            int index = _excel._xmlFiles[_excel._xmlSheetId[s]]!
-                .findAllElements('worksheet')
-                .first
-                .children
-                .indexOf(_excel._xmlFiles[_excel._xmlSheetId[s]]!
-                    .findAllElements("sheetData")
-                    .first);
-            if (index == -1) {
-              _damagedExcel();
-            }
-            _excel._xmlFiles[_excel._xmlSheetId[s]]!
-                .findAllElements('worksheet')
-                .first
-                .children
-                .insert(
-                    index + 1,
-                    XmlElement(XmlName('mergeCells'),
-                        [XmlAttribute(XmlName('count'), '0')]));
+  /// Applies merge cell elements for a single sheet into its XML DOM.
+  /// Must be called after the sheet's XML DOM exists in _xmlFiles.
+  void _applyMergeForSheet(String sheetName) {
+    if (_excel._sheetMap[sheetName] == null ||
+        _excel._sheetMap[sheetName]!._spanList.isEmpty ||
+        !_excel._xmlSheetId.containsKey(sheetName) ||
+        !_excel._xmlFiles.containsKey(_excel._xmlSheetId[sheetName])) {
+      return;
+    }
 
-            mergeElement = _excel._xmlFiles[_excel._xmlSheetId[s]]!
-                .findAllElements('mergeCells')
-                .first;
-          } else {
-            _damagedExcel();
-          }
-        }
+    var xmlFile = _excel._xmlFiles[_excel._xmlSheetId[sheetName]]!;
 
-        List<String> spannedItems =
-            List<String>.from(_excel._sheetMap[s]!.spannedItems);
+    Iterable<XmlElement> iterMergeElement =
+        xmlFile.findAllElements('mergeCells');
+    late XmlElement mergeElement;
 
-        for (final value in [
-          ['count', spannedItems.length.toString()],
-        ]) {
-          if (mergeElement.getAttributeNode(value[0]) == null) {
-            mergeElement.attributes
-                .add(XmlAttribute(XmlName(value[0]), value[1]));
-          } else {
-            mergeElement.getAttributeNode(value[0])!.value = value[1];
-          }
-        }
-
-        mergeElement.children.clear();
-
-        for (final value in spannedItems) {
-          mergeElement.children.add(XmlElement(XmlName('mergeCell'),
-              [XmlAttribute(XmlName('ref'), value)], []));
-        }
+    if (iterMergeElement.isNotEmpty) {
+      mergeElement = iterMergeElement.first;
+    } else {
+      var worksheetElements = xmlFile.findAllElements('worksheet');
+      if (worksheetElements.isEmpty) {
+        _damagedExcel();
+        return;
       }
+      var worksheet = worksheetElements.first;
+      int index = worksheet.children
+          .indexOf(xmlFile.findAllElements('sheetData').first);
+      if (index == -1) {
+        _damagedExcel();
+        return;
+      }
+      worksheet.children.insert(
+        index + 1,
+        XmlElement(
+            XmlName('mergeCells'), [XmlAttribute(XmlName('count'), '0')]),
+      );
+      mergeElement = xmlFile.findAllElements('mergeCells').first;
+    }
+
+    List<String> spannedItems =
+        List<String>.from(_excel._sheetMap[sheetName]!.spannedItems);
+
+    if (mergeElement.getAttributeNode('count') == null) {
+      mergeElement.attributes.add(
+          XmlAttribute(XmlName('count'), spannedItems.length.toString()));
+    } else {
+      mergeElement.getAttributeNode('count')!.value =
+          spannedItems.length.toString();
+    }
+
+    mergeElement.children.clear();
+    for (final ref in spannedItems) {
+      mergeElement.children.add(XmlElement(
+          XmlName('mergeCell'), [XmlAttribute(XmlName('ref'), ref)], []));
     }
   }
 
-  void _setRTL() {
-    for (var s in _excel._rtlChangeLook) {
-      var sheetObject = _excel._sheetMap[s];
-      if (sheetObject != null &&
-          _excel._xmlSheetId.containsKey(s) &&
-          _excel._xmlFiles.containsKey(_excel._xmlSheetId[s])) {
-        var itrSheetViewsRTLElement = _excel._xmlFiles[_excel._xmlSheetId[s]]
-            ?.findAllElements('sheetViews');
+  /// Applies RTL setting for a single sheet into its XML DOM.
+  /// Must be called after the sheet's XML DOM exists in _xmlFiles.
+  void _applyRTLForSheet(String sheetName) {
+    var sheetObject = _excel._sheetMap[sheetName];
+    if (sheetObject == null ||
+        !_excel._xmlSheetId.containsKey(sheetName) ||
+        !_excel._xmlFiles.containsKey(_excel._xmlSheetId[sheetName])) {
+      return;
+    }
 
-        if (itrSheetViewsRTLElement?.isNotEmpty ?? false) {
-          var itrSheetViewRTLElement = _excel._xmlFiles[_excel._xmlSheetId[s]]
-              ?.findAllElements('sheetView');
+    var xmlFile = _excel._xmlFiles[_excel._xmlSheetId[sheetName]]!;
 
-          if (itrSheetViewRTLElement?.isNotEmpty ?? false) {
-            /// clear all the children of the sheetViews here
+    var itrSheetViewsElement = xmlFile.findAllElements('sheetViews');
 
-            _excel._xmlFiles[_excel._xmlSheetId[s]]
-                ?.findAllElements('sheetViews')
-                .first
-                .children
-                .clear();
-          }
-
-          _excel._xmlFiles[_excel._xmlSheetId[s]]
-              ?.findAllElements('sheetViews')
-              .first
-              .children
-              .add(XmlElement(
-                XmlName('sheetView'),
-                [
-                  if (sheetObject.isRTL)
-                    XmlAttribute(XmlName('rightToLeft'), '1'),
-                  XmlAttribute(XmlName('workbookViewId'), '0'),
-                ],
-              ));
-        } else {
-          _excel._xmlFiles[_excel._xmlSheetId[s]]
-              ?.findAllElements('worksheet')
-              .first
-              .children
-              .add(XmlElement(XmlName('sheetViews'), [], [
-                XmlElement(
-                  XmlName('sheetView'),
-                  [
-                    if (sheetObject.isRTL)
-                      XmlAttribute(XmlName('rightToLeft'), '1'),
-                    XmlAttribute(XmlName('workbookViewId'), '0'),
-                  ],
-                )
-              ]));
-        }
-      }
+    if (itrSheetViewsElement.isNotEmpty) {
+      itrSheetViewsElement.first.children.clear();
+      itrSheetViewsElement.first.children.add(XmlElement(
+        XmlName('sheetView'),
+        [
+          if (sheetObject.isRTL)
+            XmlAttribute(XmlName('rightToLeft'), '1'),
+          XmlAttribute(XmlName('workbookViewId'), '0'),
+        ],
+      ));
+    } else {
+      xmlFile.findAllElements('worksheet').first.children.add(
+        XmlElement(XmlName('sheetViews'), [], [
+          XmlElement(
+            XmlName('sheetView'),
+            [
+              if (sheetObject.isRTL)
+                XmlAttribute(XmlName('rightToLeft'), '1'),
+              XmlAttribute(XmlName('workbookViewId'), '0'),
+            ],
+          )
+        ]),
+      );
     }
   }
 
@@ -299,6 +263,11 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
   /// Writing cell contained text into the excel sheet files.
   void _setSheetElements() {
     _excel._sharedStrings.clear();
+
+    // Pre-correct span map for all sheets with merge changes
+    if (_excel._mergeChanges) {
+      _selfCorrectSpanMap(_excel);
+    }
 
     _excel._sheetMap.forEach((sheetName, sheetObject) {
       ///
@@ -353,6 +322,18 @@ class ExcelWriter extends _WriterBase with _WriterStylesMixin {
       _setColumns(sheetObject, xmlFile);
 
       _setHeaderFooter(sheetName);
+
+      // Apply merge cells into the DOM before serialization
+      if (_excel._mergeChanges &&
+          _excel._mergeChangeLook.contains(sheetName)) {
+        _applyMergeForSheet(sheetName);
+      }
+
+      // Apply RTL into the DOM before serialization
+      if (_excel._rtlChanges &&
+          _excel._rtlChangeLook.contains(sheetName)) {
+        _applyRTLForSheet(sheetName);
+      }
 
       // Build cell data as XML string (no DOM node allocation)
       String cellDataXml = _buildSheetDataXml(sheetName, sheetObject);
