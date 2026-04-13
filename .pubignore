@@ -1,0 +1,8 @@
+benchmark/
+scripts/
+example/android/
+example/build/
+example/test/
+test/test_output/
+test/test_resources/*.xls
+.github/
