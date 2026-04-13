@@ -1,6 +1,6 @@
-## 1.0.0
+## 0.0.1
 
-- Initial stable release.
+- Initial release.
 - Performance-optimized fork of [excel](https://pub.dev/packages/excel) v5.0.0.
 - SAX-based streaming parser replaces full DOM parsing for cell data and shared strings.
 - Lazy sheet loading — sheets are parsed on first access, not at file open.

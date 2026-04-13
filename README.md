@@ -21,7 +21,7 @@ The original [`excel`](https://pub.dev/packages/excel) package works well for sm
 
 Tested on Android emulator (x86_64), same device, same test data:
 
-| Test | excel v5.0.0 | excel_plus v1.0.0 | Improvement |
+| Test | excel v5.0.0 | excel_plus v0.0.1 | Improvement |
 |------|-------------|-------------------|-------------|
 | **Create basic file** | ~160ms | **158ms** | — |
 | **7 cell types roundtrip** | ~55ms | **53ms** | — |
@@ -68,7 +68,7 @@ Tested on Android emulator (x86_64), same device, same test data:
 
 ```yaml
 dependencies:
-  excel_plus: ^1.0.0
+  excel_plus: ^0.0.1
 ```
 
 ```bash
