@@ -30,11 +30,9 @@ Drop-in replacement for the <a href="https://pub.dev/packages/excel">excel</a> p
 
 Optimized with lazy sheet loading, SAX-based parsing, and smart memory management.
 
-| Workbook Size | excel | excel_plus | Faster |
-|---------------|-------|------------|--------|
-| 10K cells | 250ms | **164ms** | **34%** |
-| 100K cells | 2,400ms | **768ms** | **68%** |
-| 5M cells | 46.3s / 11.5GB | **6.2s / 2.7GB** | **7x** |
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Masum-MSNR/excel_plus/main/images/benchmark.svg" alt="Performance benchmark" width="640"/>
+</p>
 
 ## Installation
 
