@@ -16,7 +16,7 @@ environment:
 
 dependencies:
   archive: ^4.0.4
-  xml: ">=5.0.0 <7.0.0"
+  xml: ^6.3.0
   web: ^1.1.1
 
 dev_dependencies:
