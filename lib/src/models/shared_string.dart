@@ -53,13 +53,6 @@ class _SharedStringsMaintainer {
     _entries.clear();
     _stringIndex.clear();
   }
-
-  /// Drops XmlElement references from simple (non-rich-text) SharedStrings.
-  void dropNodes() {
-    for (final entry in _entries) {
-      entry.node.dropNode();
-    }
-  }
 }
 
 class _SharedStringEntry {
@@ -96,10 +89,7 @@ class SharedString {
     return _cachedValue;
   }
 
-  /// Drops the retained XmlElement for simple (non-rich-text) strings.
-  void dropNode() {
-    if (!_isRichText) _node = null;
-  }
+  String get stringValue => _cachedValue;
 
   /// Produces XML string for this shared string without DOM allocation.
   String toXmlString() {
@@ -207,8 +197,6 @@ class SharedString {
     return TextSpan(text: text, children: children);
   }
 
-  String get stringValue => _cachedValue;
-
   @override
   int get hashCode => _hashCode;
 
@@ -217,10 +205,6 @@ class SharedString {
     return other is SharedString &&
         other.hashCode == _hashCode &&
         other.stringValue == stringValue;
-  }
-
-  bool matches(String value) {
-    return value.isNotEmpty && value == _cachedValue;
   }
 
   static String _extractStringValue(XmlElement node) {
@@ -232,15 +216,6 @@ class SharedString {
       }
     });
     return buffer.toString();
-  }
-
-  static String _escapeXml(String input) {
-    return input
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&apos;');
   }
 }
 

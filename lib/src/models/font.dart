@@ -37,12 +37,10 @@ class _FontStyle {
     }
   }
 
-  /// Get Font Color
   ExcelColor get fontColor {
     return _fontColorHex ?? ExcelColor.black;
   }
 
-  /// Set Font Color
   set fontColor(ExcelColor? fontColorHex) {
     if (fontColorHex != null) {
       _fontColorHex = _isColorAppropriate(fontColorHex.colorHex).excelColor;
@@ -51,64 +49,50 @@ class _FontStyle {
     }
   }
 
-  /// `Get FontFamily`
   String? get fontFamily {
     return _fontFamily;
   }
 
-  /// `Set FontFamily`
   set fontFamily(String? family) {
     _fontFamily = family;
   }
 
-  ///`Get FontScheme`
-  ///
   FontScheme get fontScheme {
     return _fontScheme;
   }
 
-  ///`Set FontScheme`
-  ///
   set fontScheme(FontScheme scheme) {
     _fontScheme = scheme;
   }
 
-  /// Get Font Size
   int? get fontSize {
     return _fontSize;
   }
 
-  /// Set Font Size
   set fontSize(int? fs) {
     _fontSize = fs;
   }
 
-  /// Get `Underline`
   Underline get underline {
     return _underline;
   }
 
-  /// set `Underline`
   set underline(Underline underline) {
     _underline = underline;
   }
 
-  /// Get `Bold`
   bool get isBold {
     return _bold;
   }
 
-  /// Set `Bold`
   set isBold(bool bold) {
     _bold = bold;
   }
 
-  /// Get `Italic`
   bool get isItalic {
     return _italic;
   }
 
-  /// Set `Italic`
   set isItalic(bool italic) {
     _italic = italic;
   }

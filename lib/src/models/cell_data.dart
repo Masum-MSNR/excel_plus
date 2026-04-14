@@ -21,9 +21,7 @@ class Data {
     int row,
     int column, {
     CellValue? value,
-    NumFormat? numberFormat,
     CellStyle? cellStyleVal,
-    bool isFormulaVal = false,
   })  : _sheet = sheet,
         _value = value,
         _cellStyle = cellStyleVal,
@@ -34,13 +32,10 @@ class Data {
     return Data._(sheet, row, column);
   }
 
-  /// returns the row Index
   int get rowIndex => _rowIndex;
 
-  /// returns the column Index
   int get columnIndex => _columnIndex;
 
-  /// returns the sheet-name
   String get sheetName => _sheet.sheetName;
 
   /// returns the string based cellId as A1, A2 or Z5

@@ -1,5 +1,10 @@
 part of '../../excel_plus.dart';
 
+final _excelEpoch = DateTime.utc(1899, 12, 30);
+
+double _toDayFraction(Duration delta) =>
+    delta.inMilliseconds.toDouble() / (1000 * 3600 * 24);
+
 sealed class DateTimeNumFormat extends NumFormat {
   const DateTimeNumFormat({
     required super.formatCode,
@@ -21,8 +26,7 @@ sealed class DateTimeNumFormat extends NumFormat {
       return TimeCellValue.fromFractionOfDay(value);
     }
     var delta = value * 24 * 3600 * 1000;
-    var dateOffset = DateTime.utc(1899, 12, 30);
-    final utcDate = dateOffset.add(Duration(milliseconds: delta.round()));
+    final utcDate = _excelEpoch.add(Duration(milliseconds: delta.round()));
     if (!v.contains('.') || v.endsWith('.0')) {
       return DateCellValue.fromDateTime(utcDate);
     } else {
@@ -31,17 +35,13 @@ sealed class DateTimeNumFormat extends NumFormat {
   }
 
   String writeDate(DateCellValue value) {
-    var dateOffset = DateTime.utc(1899, 12, 30);
-    final delta = value.asDateTimeUtc().difference(dateOffset);
-    final dayFractions = delta.inMilliseconds.toDouble() / (1000 * 3600 * 24);
-    return dayFractions.toString();
+    final delta = value.asDateTimeUtc().difference(_excelEpoch);
+    return _toDayFraction(delta).toString();
   }
 
   String writeDateTime(DateTimeCellValue value) {
-    var dateOffset = DateTime.utc(1899, 12, 30);
-    final delta = value.asDateTimeUtc().difference(dateOffset);
-    final dayFractions = delta.inMilliseconds.toDouble() / (1000 * 3600 * 24);
-    return dayFractions.toString();
+    final delta = value.asDateTimeUtc().difference(_excelEpoch);
+    return _toDayFraction(delta).toString();
   }
 
   @override
@@ -116,8 +116,7 @@ sealed class TimeNumFormat extends NumFormat {
       );
     }
     var delta = value * 24 * 3600 * 1000;
-    var dateOffset = DateTime.utc(1899, 12, 30);
-    final utcDate = dateOffset.add(Duration(milliseconds: delta.round()));
+    final utcDate = _excelEpoch.add(Duration(milliseconds: delta.round()));
     if (!v.contains('.') || v.endsWith('.0')) {
       return DateCellValue(
         year: utcDate.year,
@@ -139,9 +138,7 @@ sealed class TimeNumFormat extends NumFormat {
   }
 
   String writeTime(TimeCellValue value) {
-    final fractionOfDay =
-        value.asDuration().inMilliseconds.toDouble() / (1000 * 3600 * 24);
-    return fractionOfDay.toString();
+    return _toDayFraction(value.asDuration()).toString();
   }
 
   @override

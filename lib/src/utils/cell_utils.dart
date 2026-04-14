@@ -1,5 +1,14 @@
 part of '../../excel_plus.dart';
 
+String _escapeXml(String input) {
+  return input
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&apos;');
+}
+
 bool _listEquals<T>(List<T>? a, List<T>? b) {
   if (identical(a, b)) return true;
   if (a == null || b == null || a.length != b.length) return false;

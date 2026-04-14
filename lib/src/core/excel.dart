@@ -8,12 +8,12 @@ Excel _newExcel(Archive archive) {
   if (mimetype == null) {
     var xl = archive.findFile('xl/workbook.xml');
     if (xl != null) {
-      format = _spreasheetXlsx;
+      format = _spreadsheetXlsx;
     }
   }
 
   switch (format) {
-    case _spreasheetXlsx:
+    case _spreadsheetXlsx:
       return Excel._(archive);
     default:
       throw UnsupportedError(
@@ -591,7 +591,6 @@ class Excel {
   set _mergeChangeLookup(String value) {
     if (!_mergeChangeLook.contains(value)) {
       _mergeChangeLook.add(value);
-      //_mergeChanges = true;
     }
   }
 

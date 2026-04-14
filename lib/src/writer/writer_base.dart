@@ -154,14 +154,7 @@ abstract class _WriterBase {
     buf.write('</c>');
   }
 
-  static String _escapeXmlValue(String input) {
-    return input
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&apos;');
-  }
+  static String _escapeXmlValue(String input) => _escapeXml(input);
 
   _BorderSet _createBorderSetFromCellStyle(CellStyle cellStyle) => _BorderSet(
         leftBorder: cellStyle.leftBorder,

@@ -30,7 +30,7 @@ mixin _SheetRowColumnMixin on _SheetBase {
           startColumn -= 1;
         }
         endColumn -= 1;
-        if (/* startColumn >= endColumn */
+        if (
             (columnIndex == (endColumn + 1)) &&
                 (columnIndex ==
                     (columnIndex < startColumn
@@ -215,7 +215,7 @@ mixin _SheetRowColumnMixin on _SheetBase {
           startRow -= 1;
         }
         endRow -= 1;
-        if (/* startRow >= endRow */
+        if (
             (rowIndex == (endRow + 1)) &&
                 (rowIndex == (rowIndex < startRow ? startRow + 1 : startRow))) {
           _spanList[i] = null;

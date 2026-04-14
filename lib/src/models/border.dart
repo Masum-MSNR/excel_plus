@@ -45,26 +45,6 @@ class _BorderSet {
     required this.diagonalBorderDown,
   });
 
-  _BorderSet copyWith({
-    Border? leftBorder,
-    Border? rightBorder,
-    Border? topBorder,
-    Border? bottomBorder,
-    Border? diagonalBorder,
-    bool? diagonalBorderUp,
-    bool? diagonalBorderDown,
-  }) {
-    return _BorderSet(
-      leftBorder: leftBorder ?? this.leftBorder,
-      rightBorder: rightBorder ?? this.rightBorder,
-      topBorder: topBorder ?? this.topBorder,
-      bottomBorder: bottomBorder ?? this.bottomBorder,
-      diagonalBorder: diagonalBorder ?? this.diagonalBorder,
-      diagonalBorderUp: diagonalBorderUp ?? this.diagonalBorderUp,
-      diagonalBorderDown: diagonalBorderDown ?? this.diagonalBorderDown,
-    );
-  }
-
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

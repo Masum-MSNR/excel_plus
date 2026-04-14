@@ -111,238 +111,162 @@ class CellStyle {
     );
   }
 
-  ///Get Font Color
-  ///
   ExcelColor get fontColor {
     return _fontColorHex.excelColor;
   }
 
-  ///Set Font Color
-  ///
   set fontColor(ExcelColor fontColorHex) {
     _fontColorHex = _isColorAppropriate(fontColorHex.colorHex);
   }
 
-  ///Get Background Color
-  ///
   ExcelColor get backgroundColor {
     return _backgroundColorHex.excelColor;
   }
 
-  ///Set Background Color
-  ///
   set backgroundColor(ExcelColor backgroundColorHex) {
     _backgroundColorHex = _isColorAppropriate(backgroundColorHex.colorHex);
   }
 
-  ///Get Horizontal Alignment
-  ///
   HorizontalAlign get horizontalAlignment {
     return _horizontalAlign;
   }
 
-  ///Set Horizontal Alignment
-  ///
   set horizontalAlignment(HorizontalAlign horizontalAlign) {
     _horizontalAlign = horizontalAlign;
   }
 
-  ///Get Vertical Alignment
-  ///
   VerticalAlign get verticalAlignment {
     return _verticalAlign;
   }
 
-  ///Set Vertical Alignment
-  ///
   set verticalAlignment(VerticalAlign verticalAlign) {
     _verticalAlign = verticalAlign;
   }
 
-  ///`Get Wrapping`
-  ///
   TextWrapping? get wrap {
     return _textWrapping;
   }
 
-  ///`Set Wrapping`
-  ///
   set wrap(TextWrapping? textWrapping) {
     _textWrapping = textWrapping;
   }
 
-  ///`Get FontFamily`
-  ///
   String? get fontFamily {
     return _fontFamily;
   }
 
-  ///`Set FontFamily`
-  ///
   set fontFamily(String? family) {
     _fontFamily = family;
   }
 
-  ///`Get FontScheme`
-  ///
   FontScheme get fontScheme {
     return _fontScheme;
   }
 
-  ///`Set FontScheme`
-  ///
   set fontScheme(FontScheme scheme) {
     _fontScheme = scheme;
   }
 
-  ///Get Font Size
-  ///
   int? get fontSize {
     return _fontSize;
   }
 
-  ///Set Font Size
-  ///
   set fontSize(int? fs) {
     _fontSize = fs;
   }
 
-  ///Get Rotation
-  ///
   int get rotation {
     return _rotation;
   }
 
-  ///Rotation varies from [90 to -90]
-  ///
+  /// Rotation varies from 90 to -90. Negative values are stored as
+  /// absolute value + 90 per the OOXML spec.
   set rotation(int rotate) {
     if (rotate > 90 || rotate < -90) {
       rotate = 0;
     }
     if (rotate < 0) {
-      /// The value is from 0 to -90 so now make it absolute and add it to 90
-      ///
-      /// -(_rotate) + 90
       rotate = -(rotate) + 90;
     }
     _rotation = rotate;
   }
 
-  ///Get `Underline`
-  ///
   Underline get underline {
     return _underline;
   }
 
-  ///set `Underline`
-  ///
   set underline(Underline value) {
     _underline = value;
   }
 
-  ///Get `Bold`
-  ///
   bool get isBold {
     return _bold;
   }
 
-  ///Set `Bold`
   set isBold(bool bold) {
     _bold = bold;
   }
 
-  ///Get `Italic`
-  ///
   bool get isItalic {
     return _italic;
   }
 
-  ///Set `Italic`
-  ///
   set isItalic(bool italic) {
     _italic = italic;
   }
 
-  ///Get `LeftBorder`
-  ///
   Border get leftBorder {
     return _leftBorder;
   }
 
-  ///Set `LeftBorder`
-  ///
   set leftBorder(Border? leftBorder) {
     _leftBorder = leftBorder ?? Border();
   }
 
-  ///Get `RightBorder`
-  ///
   Border get rightBorder {
     return _rightBorder;
   }
 
-  ///Set `RightBorder`
-  ///
   set rightBorder(Border? rightBorder) {
     _rightBorder = rightBorder ?? Border();
   }
 
-  ///Get `TopBorder`
-  ///
   Border get topBorder {
     return _topBorder;
   }
 
-  ///Set `TopBorder`
-  ///
   set topBorder(Border? topBorder) {
     _topBorder = topBorder ?? Border();
   }
 
-  ///Get `BottomBorder`
-  ///
   Border get bottomBorder {
     return _bottomBorder;
   }
 
-  ///Set `BottomBorder`
-  ///
   set bottomBorder(Border? bottomBorder) {
     _bottomBorder = bottomBorder ?? Border();
   }
 
-  ///Get `DiagonalBorder`
-  ///
   Border get diagonalBorder {
     return _diagonalBorder;
   }
 
-  ///Set `DiagonalBorder`
-  ///
   set diagonalBorder(Border? diagonalBorder) {
     _diagonalBorder = diagonalBorder ?? Border();
   }
 
-  ///Get `DiagonalBorderUp`
-  ///
   bool get diagonalBorderUp {
     return _diagonalBorderUp;
   }
 
-  ///Set `DiagonalBorderUp`
-  ///
   set diagonalBorderUp(bool diagonalBorderUp) {
     _diagonalBorderUp = diagonalBorderUp;
   }
 
-  ///Get `DiagonalBorderDown`
-  ///
   bool get diagonalBorderDown {
     return _diagonalBorderDown;
   }
 
-  ///Set `DiagonalBorderDown`
-  ///
   set diagonalBorderDown(bool diagonalBorderDown) {
     _diagonalBorderDown = diagonalBorderDown;
   }
