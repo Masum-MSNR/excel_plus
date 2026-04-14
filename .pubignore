@@ -1,6 +1,11 @@
 benchmark/
 scripts/
 example/android/
+example/ios/
+example/linux/
+example/macos/
+example/windows/
+example/web/
 example/build/
 example/test/
 test/test_output/
