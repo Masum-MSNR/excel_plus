@@ -1,3 +1,10 @@
+## 0.0.3
+
+- Organized API docs into 5 categories: Core, Cell Values, Styling, Number Formats, Layout.
+- Hidden internal APIs (Parser, ExcelWriter, FastList, etc.) from public documentation.
+- Improved dartdoc comments across all public classes and methods.
+- Cleaned up Excel class method docs with proper one-line summaries.
+
 ## 0.0.2
 
 - Removed `collection` and `equatable` dependencies — reduced to 3 deps (`archive`, `xml`, `web`).
