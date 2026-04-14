@@ -54,7 +54,7 @@ jobs:
           sdk: stable
 
       - name: Install dependencies
-        run: dart pub get
+        run: dart pub get --no-example
 
       - name: Publish
         run: dart pub publish --force
