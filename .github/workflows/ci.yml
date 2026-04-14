@@ -9,24 +9,24 @@ jobs:
   analyze:
     name: Analyze & Test
     runs-on: ubuntu-latest
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          sdk: stable
+          channel: stable
 
       - name: Install dependencies
-        run: dart pub get --no-example
+        run: flutter pub get
 
       - name: Check formatting
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Analyze code
-        run: dart analyze
+        run: flutter analyze
 
       - name: Run tests
-        run: dart test
+        run: flutter test

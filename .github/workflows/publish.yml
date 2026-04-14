@@ -28,9 +28,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-
+          
           TAG="v${{ steps.version.outputs.version }}"
-
+          
           if git rev-parse "$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG already exists. Skipping."
           else
@@ -48,13 +48,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Dart
-        uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
         with:
-          sdk: stable
+          channel: stable
 
-      - name: Install dependencies
-        run: dart pub get --no-example
+      - name: Setup Pub Credentials
+        uses: dart-lang/setup-dart@v1
 
       - name: Publish
-        run: dart pub publish --force
+        run: flutter pub publish --force
