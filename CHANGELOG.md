@@ -1,3 +1,11 @@
+## 0.0.2
+
+- Removed `collection` and `equatable` dependencies — reduced to 3 deps (`archive`, `xml`, `web`).
+- Codebase cleanup: removed dead code, duplicate utilities, and redundant comments.
+- Consolidated XML escaping into a single shared utility.
+- Extracted common date/time fraction calculation helper.
+- Fixed minimum `xml` constraint to `^6.3.0` for downgrade compatibility.
+
 ## 0.0.1
 
 - Initial release.
