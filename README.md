@@ -28,34 +28,19 @@ Drop-in replacement for the <a href="https://pub.dev/packages/excel">excel</a> p
 
 ## Performance
 
-Performance-optimized fork with lazy sheet loading, SAX-based parsing, and smart memory management.
+Optimized with lazy sheet loading, SAX-based parsing, and smart memory management.
 
-### Benchmark — Android Emulator (API 36)
-
-| Test | excel v5.0.0 | excel_plus v0.0.1 | Improvement |
-|------|-------------|-------------------|-------------|
-| Create basic file | ~160ms | **158ms** | — |
-| 7 cell types roundtrip | ~55ms | **53ms** | — |
-| Cell styling roundtrip | ~20ms | **18ms** | — |
-| Multiple sheets (3) | ~15ms | **12ms** | 20% faster |
-| Merge cells roundtrip | ~22ms | **20ms** | — |
-| Row/column operations | ~3ms | **2ms** | — |
-| Read existing .xlsx | ~50ms | **47ms** | — |
-| 500 cells roundtrip | ~100ms | **91ms** | 9% faster |
-| Column width/row height | ~18ms | **16ms** | — |
-| Special characters | ~20ms | **17ms** | — |
-| **10,000 cells** | ~250ms | **164ms** | **34% faster** |
-| **100,000 cells** | ~2,400ms | **768ms** | **68% faster** |
-| Save to disk | ~65ms | **59ms** | — |
-| **Total (13 tests)** | **~3,178ms** | **1,425ms** | **55% faster** |
-
-> On a 5M cell benchmark: **6.2s vs 46.3s open time, 2.7GB vs 11.5GB peak memory.**
+| Workbook Size | excel | excel_plus | Faster |
+|---------------|-------|------------|--------|
+| 10K cells | 250ms | **164ms** | **34%** |
+| 100K cells | 2,400ms | **768ms** | **68%** |
+| 5M cells | 46.3s / 11.5GB | **6.2s / 2.7GB** | **7x** |
 
 ## Installation
 
 ```yaml
 dependencies:
-  excel_plus: ^0.0.1
+  excel_plus: ^latest
 ```
 
 ### Migrating from `excel`
@@ -204,7 +189,3 @@ lib/src/
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
-
-## Credits
-
-Based on the [`excel`](https://pub.dev/packages/excel) package by [Kawal Jeet](https://github.com/justkawal). `excel_plus` is a performance-optimized fork focused on mobile and large-file workloads.
