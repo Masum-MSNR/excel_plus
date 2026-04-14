@@ -187,3 +187,9 @@ lib/src/
 ## License
 
 MIT — see [LICENSE](LICENSE) for details.
+
+---
+
+<p align="center">
+  Made with ❤️ by <a href="https://github.com/Masum-MSNR">Masum</a>
+</p>

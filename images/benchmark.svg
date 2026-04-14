@@ -1,42 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 280" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif">
   <defs>
-    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ef5350"/><stop offset="100%" stop-color="#e53935"/></linearGradient>
-    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#42a5f5"/><stop offset="100%" stop-color="#1e88e5"/></linearGradient>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#e57373"/><stop offset="100%" stop-color="#d32f2f"/></linearGradient>
+    <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#64b5f6"/><stop offset="100%" stop-color="#1565c0"/></linearGradient>
   </defs>
 
   <!-- Background -->
-  <rect width="640" height="320" rx="12" fill="#0d1117"/>
+  <rect width="600" height="280" rx="12" fill="#ffffff" stroke="#e0e0e0" stroke-width="1"/>
 
   <!-- Title -->
-  <text x="320" y="36" text-anchor="middle" fill="#e6edf3" font-size="16" font-weight="600">Open + Parse Time — Lower is Better</text>
+  <text x="300" y="30" text-anchor="middle" fill="#212121" font-size="15" font-weight="600">Parse Time — Lower is Better</text>
 
   <!-- Legend -->
-  <rect x="200" y="50" width="12" height="12" rx="3" fill="url(#g1)"/>
-  <text x="218" y="61" fill="#f85149" font-size="12">excel</text>
-  <rect x="340" y="50" width="12" height="12" rx="3" fill="url(#g2)"/>
-  <text x="358" y="61" fill="#58a6ff" font-size="12">excel_plus</text>
+  <rect x="190" y="44" width="12" height="12" rx="3" fill="url(#g1)"/>
+  <text x="208" y="55" fill="#c62828" font-size="11" font-weight="500">excel</text>
+  <rect x="320" y="44" width="12" height="12" rx="3" fill="url(#g2)"/>
+  <text x="338" y="55" fill="#1565c0" font-size="11" font-weight="500">excel_plus</text>
+
+  <!-- Grid lines -->
+  <line x1="110" y1="72" x2="540" y2="72" stroke="#f5f5f5" stroke-width="1"/>
+  <line x1="110" y1="142" x2="540" y2="142" stroke="#f5f5f5" stroke-width="1"/>
+  <line x1="110" y1="212" x2="540" y2="212" stroke="#f5f5f5" stroke-width="1"/>
 
   <!-- 10K cells -->
-  <text x="100" y="104" text-anchor="end" fill="#8b949e" font-size="13">10K cells</text>
-  <rect x="115" y="90" width="400" height="24" rx="6" fill="url(#g1)" opacity="0.9"/>
-  <text x="520" y="107" fill="#f85149" font-size="12" font-weight="600">250 ms</text>
-  <rect x="115" y="118" width="262" height="24" rx="6" fill="url(#g2)" opacity="0.9"/>
-  <text x="382" y="135" fill="#58a6ff" font-size="12" font-weight="600">164 ms</text>
-  <text x="600" y="120" text-anchor="end" fill="#3fb950" font-size="13" font-weight="700">34% faster</text>
+  <text x="100" y="92" text-anchor="end" fill="#616161" font-size="13" font-weight="500">10K cells</text>
+  <rect x="110" y="78" width="400" height="18" rx="4" fill="url(#g1)"/>
+  <text x="516" y="92" fill="#c62828" font-size="11" font-weight="600">250ms</text>
+  <rect x="110" y="100" width="262" height="18" rx="4" fill="url(#g2)"/>
+  <text x="378" y="114" fill="#1565c0" font-size="11" font-weight="600">164ms</text>
+  <rect x="548" y="86" width="46" height="18" rx="9" fill="#e8f5e9"/>
+  <text x="571" y="99" text-anchor="middle" fill="#2e7d32" font-size="10" font-weight="700">34%↓</text>
 
   <!-- 100K cells -->
-  <text x="100" y="192" text-anchor="end" fill="#8b949e" font-size="13">100K cells</text>
-  <rect x="115" y="178" width="400" height="24" rx="6" fill="url(#g1)" opacity="0.9"/>
-  <text x="520" y="195" fill="#f85149" font-size="12" font-weight="600">2,400 ms</text>
-  <rect x="115" y="206" width="128" height="24" rx="6" fill="url(#g2)" opacity="0.9"/>
-  <text x="248" y="223" fill="#58a6ff" font-size="12" font-weight="600">768 ms</text>
-  <text x="600" y="208" text-anchor="end" fill="#3fb950" font-size="13" font-weight="700">68% faster</text>
+  <text x="100" y="162" text-anchor="end" fill="#616161" font-size="13" font-weight="500">100K cells</text>
+  <rect x="110" y="148" width="400" height="18" rx="4" fill="url(#g1)"/>
+  <text x="516" y="162" fill="#c62828" font-size="11" font-weight="600">2.4s</text>
+  <rect x="110" y="170" width="128" height="18" rx="4" fill="url(#g2)"/>
+  <text x="244" y="184" fill="#1565c0" font-size="11" font-weight="600">768ms</text>
+  <rect x="548" y="156" width="46" height="18" rx="9" fill="#e8f5e9"/>
+  <text x="571" y="169" text-anchor="middle" fill="#2e7d32" font-size="10" font-weight="700">68%↓</text>
 
   <!-- 5M cells -->
-  <text x="100" y="280" text-anchor="end" fill="#8b949e" font-size="13">5M cells</text>
-  <rect x="115" y="266" width="400" height="24" rx="6" fill="url(#g1)" opacity="0.9"/>
-  <text x="520" y="283" fill="#f85149" font-size="12" font-weight="600">46.3 s</text>
-  <rect x="115" y="294" width="54" height="24" rx="6" fill="url(#g2)" opacity="0.9"/>
-  <text x="174" y="311" fill="#58a6ff" font-size="12" font-weight="600">6.2 s</text>
-  <text x="600" y="296" text-anchor="end" fill="#3fb950" font-size="13" font-weight="700">7× faster</text>
+  <text x="100" y="232" text-anchor="end" fill="#616161" font-size="13" font-weight="500">5M cells</text>
+  <rect x="110" y="218" width="400" height="18" rx="4" fill="url(#g1)"/>
+  <text x="516" y="232" fill="#c62828" font-size="11" font-weight="600">46.3s</text>
+  <rect x="110" y="240" width="54" height="18" rx="4" fill="url(#g2)"/>
+  <text x="170" y="254" fill="#1565c0" font-size="11" font-weight="600">6.2s</text>
+  <rect x="548" y="226" width="46" height="18" rx="9" fill="#e8f5e9"/>
+  <text x="571" y="239" text-anchor="middle" fill="#2e7d32" font-size="10" font-weight="700">7×↓</text>
+
+  <!-- Bottom note -->
+  <text x="300" y="272" text-anchor="middle" fill="#9e9e9e" font-size="10">Memory at 5M cells: excel 11.5GB → excel_plus 2.7GB (76% less)</text>
 </svg>
