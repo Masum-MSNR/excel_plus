@@ -9,7 +9,7 @@ topics:
   - xlsx
   - spreadsheet
   - office
-  - file
+  - excel-parser
 
 environment:
   sdk: ^3.11.4
