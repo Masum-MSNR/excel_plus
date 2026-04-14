@@ -1,5 +1,6 @@
 part of '../../excel_plus.dart';
 
+/// @nodoc
 class ExcelWriter extends _WriterBase with _WriterStylesMixin {
   ExcelWriter._(super.excel, super.parser);
 

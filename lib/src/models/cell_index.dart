@@ -1,6 +1,8 @@
 part of '../../excel_plus.dart';
 
 /// Identifies a cell position by its column and row index.
+///
+/// {@category Core}
 class CellIndex {
   CellIndex._({required this.columnIndex, required this.rowIndex});
 

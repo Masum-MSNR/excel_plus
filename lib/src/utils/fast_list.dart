@@ -1,6 +1,6 @@
 part of '../../excel_plus.dart';
 
-// A helper class to optimized the usage of Maps
+/// @nodoc
 class FastList<K> {
   Map<K, int> _map = <K, int>{};
   int _index = 0;

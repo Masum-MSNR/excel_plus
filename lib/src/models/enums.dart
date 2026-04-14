@@ -1,40 +1,41 @@
 part of '../../excel_plus.dart';
 
-///enum for `wrapping` up the text
+/// Text wrapping mode for cells.
 ///
+/// {@category Styling}
 enum TextWrapping {
   WrapText,
   Clip,
 }
 
+/// Vertical alignment of cell content.
 ///
-///enum for setting `vertical alignment`
-///
+/// {@category Styling}
 enum VerticalAlign {
   Top,
   Center,
   Bottom,
 }
 
+/// Horizontal alignment of cell content.
 ///
-///enum for setting `horizontal alignment`
-///
+/// {@category Styling}
 enum HorizontalAlign {
   Left,
   Center,
   Right,
 }
 
+/// Text underline style.
 ///
-///`Underline`
-///
+/// {@category Styling}
 enum Underline {
   None,
   Single,
   Double,
 }
 
+/// Font scheme setting.
 ///
-///enum for setting `font scheme`
-///
+/// {@category Styling}
 enum FontScheme { Unset, Major, Minor }

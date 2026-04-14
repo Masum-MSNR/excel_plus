@@ -21,7 +21,9 @@ Excel _newExcel(Archive archive) {
   }
 }
 
-/// Decode a excel file.
+/// The main class for reading, creating, and editing Excel `.xlsx` files.
+///
+/// {@category Core}
 class Excel {
   bool _styleChanges = false;
   bool _mergeChanges = false;
@@ -96,9 +98,7 @@ class Excel {
     return _newExcel(ZipDecoder().decodeStream(input));
   }
 
-  ///
-  ///It will return `tables` as map in order to mimic the previous versions reading the data.
-  ///
+  /// Returns all sheets as a map of sheet names to [Sheet] objects.
   Map<String, Sheet> get tables {
     if (_sheetMap.isEmpty) {
       _damagedExcel(text: "Corrupted Excel file.");
@@ -107,44 +107,26 @@ class Excel {
     return Map<String, Sheet>.from(_sheetMap);
   }
 
-  ///
-  ///It will return the SheetObject of `sheet`.
-  ///
-  ///If the `sheet` does not exist then it will create `sheet` with `New Sheet Object`
-  ///
+  /// Returns the [Sheet] for [sheet], creating it if it doesn't exist.
   Sheet operator [](String sheet) {
     _availSheet(sheet);
     return _sheetMap[sheet]!;
   }
 
-  ///
-  ///Returns the `Map<String, Sheet>`
-  ///
-  ///where `key` is the `Sheet Name` and the `value` is the `Sheet Object`
-  ///
+  /// Returns all sheets as a map of sheet names to [Sheet] objects.
   Map<String, Sheet> get sheets {
     parser._ensureAllSheetsParsed();
     return Map<String, Sheet>.from(_sheetMap);
   }
 
-  ///
-  ///If `sheet` does not exist then it will be automatically created with contents of `sheetObject`
-  ///
-  ///Newly created sheet with name = `sheet` will have seperate reference and will not be linked to sheetObject.
-  ///
+  /// Sets [sheet] contents to a clone of [sheetObject].
   void operator []=(String sheet, Sheet sheetObject) {
     _availSheet(sheet);
 
     _sheetMap[sheet] = Sheet._clone(this, sheet, sheetObject);
   }
 
-  ///
-  ///`sheet2Object` will be linked with `sheet1`.
-  ///
-  ///If `sheet1` does not exist then it will be automatically created.
-  ///
-  ///Important Note: After linkage the operations performed on `sheet1`, will also get performed on `sheet2Object` and `vica-versa`.
-  ///
+  /// Links [sheet1] to [existingSheetObject] so changes to one affect the other.
   void link(String sheet1, Sheet existingSheetObject) {
     if (_sheetMap[existingSheetObject.sheetName] != null) {
       _availSheet(sheet1);
@@ -158,9 +140,7 @@ class Excel {
     }
   }
 
-  ///
-  ///If `sheet` is linked with any other sheet's object then it's link will be broke
-  ///
+  /// Breaks the link between [sheet] and any shared sheet object.
   void unLink(String sheet) {
     if (_sheetMap[sheet] != null) {
       ///
@@ -169,13 +149,7 @@ class Excel {
     }
   }
 
-  ///
-  ///Copies the content of `fromSheet` into `toSheet`.
-  ///
-  ///In order to successfully copy: `fromSheet` should exist in `excel.tables.keys`.
-  ///
-  ///If `toSheet` does not exist then it will be automatically created.
-  ///
+  /// Copies contents of [fromSheet] into [toSheet].
   void copy(String fromSheet, String toSheet) {
     _availSheet(toSheet);
 
@@ -188,11 +162,7 @@ class Excel {
     }
   }
 
-  ///
-  ///Changes the name from `oldSheetName` to `newSheetName`.
-  ///
-  ///In order to rename : `oldSheetName` should exist in `excel.tables.keys` and `newSheetName` must not exist.
-  ///
+  /// Renames [oldSheetName] to [newSheetName].
   void rename(String oldSheetName, String newSheetName) {
     if (_sheetMap[oldSheetName] != null && _sheetMap[newSheetName] == null) {
       ///
@@ -209,9 +179,7 @@ class Excel {
     }
   }
 
-  ///
-  ///If `sheet` exist in `excel.tables.keys` and `excel.tables.keys.length >= 2` then it will be `deleted`.
-  ///
+  /// Deletes [sheet] if it exists and is not the last sheet.
   void delete(String sheet) {
     ///
     /// remove the sheet `name` or `key` from the below locations if they exist.
@@ -317,9 +285,7 @@ class Excel {
     }
   }
 
-  ///
-  ///It will start setting the edited values of `sheets` into the `files` and then `exports the file`.
-  ///
+  /// Encodes the workbook as `.xlsx` bytes.
   List<int>? encode() {
     ExcelWriter writer = ExcelWriter._(this, parser);
     return writer._save();
@@ -352,9 +318,7 @@ class Excel {
     return helper.SavingHelper.saveFile(onValue, fileName);
   }
 
-  ///
-  ///returns the name of the `defaultSheet` (the sheet which opens firstly when xlsx file is opened in `excel based software`).
-  ///
+  /// Returns the name of the default sheet.
   String? getDefaultSheet() {
     if (_defaultSheet != null) {
       return _defaultSheet;
@@ -387,9 +351,7 @@ class Excel {
     return null;
   }
 
-  ///
-  ///It returns `true` if the passed `sheetName` is successfully set to `default opening sheet` otherwise returns `false`.
-  ///
+  /// Sets [sheetName] as the default opening sheet. Returns `true` on success.
   bool setDefaultSheet(String sheetName) {
     if (_sheetMap[sheetName] != null) {
       _defaultSheet = sheetName;
@@ -398,13 +360,7 @@ class Excel {
     return false;
   }
 
-  ///
-  ///Inserts an empty `column` in sheet at position = `columnIndex`.
-  ///
-  ///If `columnIndex == null` or `columnIndex < 0` if will not execute
-  ///
-  ///If the `sheet` does not exists then it will be created automatically.
-  ///
+  /// Inserts an empty column at [columnIndex] in [sheet].
   void insertColumn(String sheet, int columnIndex) {
     if (columnIndex < 0) {
       return;
@@ -413,22 +369,14 @@ class Excel {
     _sheetMap[sheet]!.insertColumn(columnIndex);
   }
 
-  ///
-  ///If `sheet` exists and `columnIndex < maxColumns` then it removes column at index = `columnIndex`
-  ///
+  /// Removes the column at [columnIndex] from [sheet].
   void removeColumn(String sheet, int columnIndex) {
     if (columnIndex >= 0 && _sheetMap[sheet] != null) {
       _sheetMap[sheet]!.removeColumn(columnIndex);
     }
   }
 
-  ///
-  ///Inserts an empty row in `sheet` at position = `rowIndex`.
-  ///
-  ///If `rowIndex == null` or `rowIndex < 0` if will not execute
-  ///
-  ///If the `sheet` does not exists then it will be created automatically.
-  ///
+  /// Inserts an empty row at [rowIndex] in [sheet].
   void insertRow(String sheet, int rowIndex) {
     if (rowIndex < 0) {
       return;
@@ -437,20 +385,14 @@ class Excel {
     _sheetMap[sheet]!.insertRow(rowIndex);
   }
 
-  ///
-  ///If `sheet` exists and `rowIndex < maxRows` then it removes row at index = `rowIndex`
-  ///
+  /// Removes the row at [rowIndex] from [sheet].
   void removeRow(String sheet, int rowIndex) {
     if (rowIndex >= 0 && _sheetMap[sheet] != null) {
       _sheetMap[sheet]!.removeRow(rowIndex);
     }
   }
 
-  ///
-  ///Appends [row] iterables just post the last filled index in the [sheet]
-  ///
-  ///If `sheet` does not exist then it will be automatically created.
-  ///
+  /// Appends [row] after the last filled row in [sheet].
   void appendRow(String sheet, List<CellValue?> row) {
     if (row.isEmpty) {
       return;
@@ -460,17 +402,7 @@ class Excel {
     insertRowIterables(sheet, row, targetRow);
   }
 
-  ///
-  ///If `sheet` does not exist then it will be automatically created.
-  ///
-  ///Adds the [row] iterables in the given rowIndex = [rowIndex] in [sheet]
-  ///
-  ///[startingColumn] tells from where we should start putting the [row] iterables
-  ///
-  ///[overwriteMergedCells] when set to [true] will over-write mergedCell and does not jumps to next unqiue cell.
-  ///
-  ///[overwriteMergedCells] when set to [false] puts the cell value to next unique cell available by putting the value in merged cells only once and jumps to next unique cell.
-  ///
+  /// Inserts [row] values at [rowIndex] in [sheet].
   void insertRowIterables(String sheet, List<CellValue?> row, int rowIndex,
       {int startingColumn = 0, bool overwriteMergedCells = true}) {
     if (rowIndex < 0) {
@@ -482,26 +414,7 @@ class Excel {
         overwriteMergedCells: overwriteMergedCells);
   }
 
-  ///
-  ///Returns the `count` of replaced `source` with `target`
-  ///
-  ///`source` is Pattern which allows you to pass your custom `RegExp` or a `String` providing more control over it.
-  ///
-  ///optional argument `first` is used to replace the number of first earlier occurrences
-  ///
-  ///If `first` is set to `3` then it will replace only first `3 occurrences` of the `source` with `target`.
-  ///
-  ///       excel.findAndReplace('MySheetName', 'sad', 'happy', first: 3);
-  ///
-  ///       or
-  ///
-  ///       var mySheet = excel['mySheetName'];
-  ///       mySheet.findAndReplace('MySheetName', 'sad', 'happy', first: 3);
-  ///
-  ///In the above example it will replace all the occurences of `sad` with `happy` in the cells
-  ///
-  ///Other `options` are used to `narrow down` the `starting and ending ranges of cells`.
-  ///
+  /// Replaces occurrences of [source] with [target] in [sheet]. Returns the count of replacements.
   int findAndReplace(String sheet, Pattern source, dynamic target,
       {int first = -1,
       int startingRow = -1,
@@ -536,15 +449,7 @@ class Excel {
     }
   }
 
-  ///
-  ///Updates the contents of `sheet` of the `cellIndex: CellIndex.indexByColumnRow(0, 0);` where indexing starts from 0
-  ///
-  ///----or---- by `cellIndex: CellIndex.indexByString("A3");`.
-  ///
-  ///Styling of cell can be done by passing the CellStyle object to `cellStyle`.
-  ///
-  ///If `sheet` does not exist then it will be automatically created.
-  ///
+  /// Updates a cell's value and optional style at [cellIndex] in [sheet].
   void updateCell(String sheet, CellIndex cellIndex, CellValue? value,
       {CellStyle? cellStyle}) {
     _availSheet(sheet);
@@ -552,35 +457,20 @@ class Excel {
     _sheetMap[sheet]!.updateCell(cellIndex, value, cellStyle: cellStyle);
   }
 
-  ///
-  ///Merges the cells starting from `start` to `end`.
-  ///
-  ///If `custom value` is not defined then it will look for the very first available value in range `start` to `end` by searching row-wise from left to right.
-  ///
-  ///If `sheet` does not exist then it will be automatically created.
-  ///
+  /// Merges cells from [start] to [end] in [sheet].
   void merge(String sheet, CellIndex start, CellIndex end,
       {CellValue? customValue}) {
     _availSheet(sheet);
     _sheetMap[sheet]!.merge(start, end, customValue: customValue);
   }
 
-  ///
-  ///returns an Iterable of `cell-Id` for the previously merged cell-Ids.
-  ///
+  /// Returns a list of merged cell ranges (e.g. `"A1:B2"`) in [sheet].
   List<String> getMergedCells(String sheet) {
     return List<String>.from(
         _sheetMap[sheet] != null ? _sheetMap[sheet]!.spannedItems : <String>[]);
   }
 
-  ///
-  ///unMerge the merged cells.
-  ///
-  ///       var sheet = 'DesiredSheet';
-  ///       List<String> spannedCells = excel.getMergedCells(sheet);
-  ///       var cellToUnMerge = "A1:A2";
-  ///       excel.unMerge(sheet, cellToUnMerge);
-  ///
+  /// Unmerges the given [unmergeCells] range (e.g. `"A1:A2"`) in [sheet].
   void unMerge(String sheet, String unmergeCells) {
     if (_sheetMap[sheet] != null) {
       _sheetMap[sheet]!.unMerge(unmergeCells);

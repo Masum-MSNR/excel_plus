@@ -9,6 +9,7 @@ Map<V, K> _createInverseMap<K, V>(Map<K, V> map) {
   return inverse;
 }
 
+/// @nodoc
 class NumFormatMaintainer {
   static const int _firstCustomFmtId = 164;
   int _nextFmtId = _firstCustomFmtId;
@@ -52,6 +53,9 @@ class NumFormatMaintainer {
   }
 }
 
+/// Base class for number formats that control how cell values are displayed.
+///
+/// {@category Number Formats}
 sealed class NumFormat {
   final String formatCode;
 
@@ -245,15 +249,24 @@ bool _formatCodeLooksLikeDateTime(String formatCode) {
   return false;
 }
 
+/// Interface for standard (built-in) number formats.
+///
+/// {@category Number Formats}
 sealed class StandardNumFormat implements NumFormat {
   int get numFmtId;
 }
 
+/// Interface for custom (user-defined) number formats.
+///
+/// {@category Number Formats}
 sealed class CustomNumFormat implements NumFormat {
   @override
   String get formatCode;
 }
 
+/// Base class for numeric number formats.
+///
+/// {@category Number Formats}
 sealed class NumericNumFormat extends NumFormat {
   const NumericNumFormat({
     required super.formatCode,
@@ -293,6 +306,9 @@ sealed class NumericNumFormat extends NumFormat {
   }
 }
 
+/// A standard numeric number format with a fixed format ID.
+///
+/// {@category Number Formats}
 class StandardNumericNumFormat extends NumericNumFormat
     implements StandardNumFormat {
   @override
@@ -322,6 +338,9 @@ class StandardNumericNumFormat extends NumericNumFormat
   }
 }
 
+/// A custom numeric number format with a user-defined format code.
+///
+/// {@category Number Formats}
 class CustomNumericNumFormat extends NumericNumFormat
     implements CustomNumFormat {
   const CustomNumericNumFormat({

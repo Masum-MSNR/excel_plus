@@ -1,6 +1,8 @@
 part of '../../excel_plus.dart';
 
 /// Header and footer settings for a worksheet.
+///
+/// {@category Layout}
 class HeaderFooter {
   /// Whether header/footer aligns with page margins.
   bool? alignWithMargins;
@@ -115,7 +117,7 @@ class HeaderFooter {
   }
 }
 
-/// Adds boolean parsing to [String].
+/// @nodoc
 extension BoolParsing on String {
   /// Parses `"true"`, `"1"` as `true` and `"false"`, `"0"` as `false`.
   bool parseBool() {

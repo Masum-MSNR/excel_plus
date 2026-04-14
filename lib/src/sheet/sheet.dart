@@ -1,6 +1,8 @@
 part of '../../excel_plus.dart';
 
 /// Represents a single worksheet within an Excel workbook.
+///
+/// {@category Core}
 class Sheet extends _SheetBase with _SheetRowColumnMixin, _SheetMergeMixin {
   ///
   /// It will clone the object by changing the `this` reference of previous oldSheetObject and putting `new this` reference, with copying the values too
@@ -233,15 +235,10 @@ class Sheet extends _SheetBase with _SheetRowColumnMixin, _SheetMergeMixin {
     insertRowIterables(row, targetRow);
   }
 
+  /// Inserts [row] values at [rowIndex].
   ///
-  /// Adds the [row] iterables in the given rowIndex = [rowIndex] in [sheet]
-  ///
-  /// [startingColumn] tells from where we should start putting the [row] iterables
-  ///
-  /// [overwriteMergedCells] when set to [true] will over-write mergedCell and does not jumps to next unqiue cell.
-  ///
-  /// [overwriteMergedCells] when set to [false] puts the cell value in next unique cell available and putting the value in merged cells only once.
-  ///
+  /// [overwriteMergedCells] when `true` will overwrite merged cells directly.
+  /// When `false`, puts the value in the next unique cell.
   void insertRowIterables(
     List<CellValue?> row,
     int rowIndex, {

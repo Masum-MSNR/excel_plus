@@ -1,5 +1,6 @@
 part of '../../excel_plus.dart';
 
+/// @nodoc
 class Parser extends _ParserBase with _ParserStylesMixin {
   Parser._(super.excel);
 

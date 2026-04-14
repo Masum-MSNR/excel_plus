@@ -5,6 +5,9 @@ final _excelEpoch = DateTime.utc(1899, 12, 30);
 double _toDayFraction(Duration delta) =>
     delta.inMilliseconds.toDouble() / (1000 * 3600 * 24);
 
+/// Base class for date/time number formats.
+///
+/// {@category Number Formats}
 sealed class DateTimeNumFormat extends NumFormat {
   const DateTimeNumFormat({
     required super.formatCode,
@@ -58,6 +61,9 @@ sealed class DateTimeNumFormat extends NumFormat {
       };
 }
 
+/// A standard date/time format with a fixed format ID.
+///
+/// {@category Number Formats}
 class StandardDateTimeNumFormat extends DateTimeNumFormat
     implements StandardNumFormat {
   @override
@@ -74,6 +80,9 @@ class StandardDateTimeNumFormat extends DateTimeNumFormat
   }
 }
 
+/// A custom date/time format with a user-defined format code.
+///
+/// {@category Number Formats}
 class CustomDateTimeNumFormat extends DateTimeNumFormat
     implements CustomNumFormat {
   const CustomDateTimeNumFormat({
@@ -86,6 +95,9 @@ class CustomDateTimeNumFormat extends DateTimeNumFormat
   }
 }
 
+/// Base class for time-only number formats.
+///
+/// {@category Number Formats}
 sealed class TimeNumFormat extends NumFormat {
   const TimeNumFormat({
     required super.formatCode,
@@ -155,6 +167,9 @@ sealed class TimeNumFormat extends NumFormat {
       };
 }
 
+/// A standard time format with a fixed format ID.
+///
+/// {@category Number Formats}
 class StandardTimeNumFormat extends TimeNumFormat implements StandardNumFormat {
   @override
   final int numFmtId;
@@ -170,6 +185,9 @@ class StandardTimeNumFormat extends TimeNumFormat implements StandardNumFormat {
   }
 }
 
+/// A custom time format with a user-defined format code.
+///
+/// {@category Number Formats}
 class CustomTimeNumFormat extends TimeNumFormat implements CustomNumFormat {
   const CustomTimeNumFormat({
     required super.formatCode,

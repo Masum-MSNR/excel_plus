@@ -3,11 +3,15 @@ part of '../../excel_plus.dart';
 /// Base type for all cell values in an Excel worksheet.
 ///
 /// Each subclass represents a different data type that can be stored in a cell.
+///
+/// {@category Cell Values}
 sealed class CellValue {
   const CellValue();
 }
 
 /// A cell value containing a formula expression.
+///
+/// {@category Cell Values}
 class FormulaCellValue extends CellValue {
   /// The formula string (e.g. `SUM(A1:A10)`).
   final String formula;
@@ -30,6 +34,8 @@ class FormulaCellValue extends CellValue {
 }
 
 /// A cell value containing an integer.
+///
+/// {@category Cell Values}
 class IntCellValue extends CellValue {
   /// The integer value.
   final int value;
@@ -52,6 +58,8 @@ class IntCellValue extends CellValue {
 }
 
 /// A cell value containing a double.
+///
+/// {@category Cell Values}
 class DoubleCellValue extends CellValue {
   /// The double value.
   final double value;
@@ -74,6 +82,8 @@ class DoubleCellValue extends CellValue {
 }
 
 /// A cell value containing a date (year, month, day).
+///
+/// {@category Cell Values}
 class DateCellValue extends CellValue {
   /// The year component.
   final int year;
@@ -126,6 +136,8 @@ class DateCellValue extends CellValue {
 }
 
 /// A cell value containing text, optionally with rich-text formatting.
+///
+/// {@category Cell Values}
 class TextCellValue extends CellValue {
   /// The text content as a [TextSpan].
   final TextSpan value;
@@ -151,6 +163,8 @@ class TextCellValue extends CellValue {
 }
 
 /// A cell value containing a boolean.
+///
+/// {@category Cell Values}
 class BoolCellValue extends CellValue {
   /// The boolean value.
   final bool value;
@@ -173,6 +187,8 @@ class BoolCellValue extends CellValue {
 }
 
 /// A cell value containing a time of day.
+///
+/// {@category Cell Values}
 class TimeCellValue extends CellValue {
   /// Hours component.
   final int hour;
@@ -268,6 +284,8 @@ class TimeCellValue extends CellValue {
 
 /// Excel does not know if this is UTC or not. Use methods [asDateTimeLocal]
 /// or [asDateTimeUtc] to get the DateTime object you prefer.
+///
+/// {@category Cell Values}
 class DateTimeCellValue extends CellValue {
   /// The year component.
   final int year;

@@ -18,6 +18,7 @@ bool _listEquals<T>(List<T>? a, List<T>? b) {
   return true;
 }
 
+/// @nodoc
 String getCellId(int columnIndex, int rowIndex) {
   return '${_numericToLetters(columnIndex + 1)}${rowIndex + 1}';
 }
@@ -33,7 +34,7 @@ String _isColorAppropriate(String value) {
   }
 }
 
-/// Convert a character based column
+/// @nodoc
 int lettersToNumeric(String letters) {
   var sum = 0, mul = 1, n = 1;
   for (var index = letters.length - 1; index >= 0; index--) {
@@ -128,6 +129,7 @@ void _damagedExcel({String text = ''}) {
 ///
 ///return A2:B2 for spanning storage in unmerge list when [0,2] [2,2] is passed
 ///
+/// @nodoc
 String getSpanCellId(int startColumn, int startRow, int endColumn, int endRow) {
   return '${getCellId(startColumn, startRow)}:${getCellId(endColumn, endRow)}';
 }
@@ -199,6 +201,7 @@ String getSpanCellId(int startColumn, int startRow, int endColumn, int endRow) {
 ///     `getColumnAlphabet(0); // returns A`
 ///     `getColumnAlphabet(5); // returns F`
 ///
+/// @nodoc
 String getColumnAlphabet(int columnIndex) {
   return _numericToLetters(columnIndex + 1);
 }
@@ -209,6 +212,7 @@ String getColumnAlphabet(int columnIndex) {
 ///    `getColumnAlphabet("A"); // returns 0`
 ///    `getColumnAlphabet("F"); // returns 5`
 ///
+/// @nodoc
 int getColumnIndex(String columnAlphabet) {
   return _cellCoordsFromCellId(columnAlphabet).$2;
 }

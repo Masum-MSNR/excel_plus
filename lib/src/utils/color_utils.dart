@@ -72,6 +72,7 @@ const _hexTable = {
 
 final _hexTableReverse = _hexTable.map((k, v) => MapEntry(v, k));
 
+/// @nodoc
 extension StringExt on String {
   ExcelColor get excelColor => this == 'none'
       ? ExcelColor.none

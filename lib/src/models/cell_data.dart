@@ -3,6 +3,8 @@ part of '../../excel_plus.dart';
 /// Represents a single cell's data within a [Sheet].
 ///
 /// Contains the cell's value, style, and position information.
+///
+/// {@category Core}
 class Data {
   CellStyle? _cellStyle;
   CellValue? _value;

@@ -66,7 +66,7 @@ class _SharedStringEntry {
   }
 }
 
-/// Represents a shared string entry in the xlsx shared string table.
+/// @nodoc
 class SharedString {
   XmlElement? _node;
   final String _cachedValue;
@@ -225,6 +225,8 @@ class SharedString {
 }
 
 /// A span of optionally styled text, similar to Flutter's TextSpan.
+///
+/// {@category Cell Values}
 class TextSpan {
   /// The plain text content of this span.
   final String? text;

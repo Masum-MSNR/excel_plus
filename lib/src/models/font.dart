@@ -121,6 +121,9 @@ class _FontStyle {
       );
 }
 
+/// Available font families.
+///
+/// {@category Styling}
 enum FontFamily {
   Al_Bayan_Plain,
   Abadi_MT_Condensed_Light,
@@ -311,6 +314,7 @@ enum FontFamily {
 ///returns the `Font Family Name`
 ///
 ///
+/// @nodoc
 String getFontFamily(FontFamily fontFamily) {
   return (fontFamily.toString().replaceAll('FontFamily.', ''))
       .replaceAll('_', ' ');

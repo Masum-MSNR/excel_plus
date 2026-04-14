@@ -1,6 +1,8 @@
 part of '../../excel_plus.dart';
 
-/// Styling class for cells
+/// Styling class for cells.
+///
+/// {@category Styling}
 // ignore: must_be_immutable
 class CellStyle {
   String _fontColorHex = ExcelColor.black.colorHex;

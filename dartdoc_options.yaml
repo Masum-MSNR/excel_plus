@@ -1,0 +1,18 @@
+dartdoc:
+  categoryOrder:
+    - "Core"
+    - "Cell Values"
+    - "Styling"
+    - "Number Formats"
+    - "Layout"
+  categories:
+    "Core":
+      markdown: doc/categories/core.md
+    "Cell Values":
+      markdown: doc/categories/cell_values.md
+    "Styling":
+      markdown: doc/categories/styling.md
+    "Number Formats":
+      markdown: doc/categories/number_formats.md
+    "Layout":
+      markdown: doc/categories/layout.md

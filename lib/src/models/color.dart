@@ -1,6 +1,8 @@
 part of '../../excel_plus.dart';
 
-/// Copying from Flutter Material Color
+/// Represents a color value for use in cell styling.
+///
+/// {@category Styling}
 class ExcelColor {
   const ExcelColor._(this._color, [this._name, this._type]);
 
@@ -823,6 +825,9 @@ class ExcelColor {
   int get hashCode => Object.hash(_name, _color, _type, colorHex, colorInt);
 }
 
+/// Color type category.
+///
+/// {@category Styling}
 enum ColorType {
   color,
   material,
