@@ -1,3 +1,7 @@
+/// A high-performance library for reading, creating, and editing
+/// Excel `.xlsx` files in Dart and Flutter.
+library;
+
 import 'dart:convert';
 import 'dart:math';
 import 'package:archive/archive.dart';

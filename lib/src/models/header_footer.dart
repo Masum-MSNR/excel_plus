@@ -1,18 +1,38 @@
 part of '../../excel_plus.dart';
 
+/// Header and footer settings for a worksheet.
 class HeaderFooter {
+  /// Whether header/footer aligns with page margins.
   bool? alignWithMargins;
+
+  /// Whether the first page has a different header/footer.
   bool? differentFirst;
+
+  /// Whether odd and even pages have different headers/footers.
   bool? differentOddEven;
+
+  /// Whether the header/footer scales with the document.
   bool? scaleWithDoc;
 
+  /// Footer text for even-numbered pages.
   String? evenFooter;
+
+  /// Header text for even-numbered pages.
   String? evenHeader;
+
+  /// Footer text for the first page.
   String? firstFooter;
+
+  /// Header text for the first page.
   String? firstHeader;
+
+  /// Footer text for odd-numbered pages.
   String? oddFooter;
+
+  /// Header text for odd-numbered pages.
   String? oddHeader;
 
+  /// Creates a [HeaderFooter] with all optional fields.
   HeaderFooter({
     this.alignWithMargins,
     this.differentFirst,
@@ -26,6 +46,7 @@ class HeaderFooter {
     this.oddHeader,
   });
 
+  /// Serializes this header/footer to an XML element.
   XmlNode toXmlElement() {
     final attributes = <XmlAttribute>[];
     if (alignWithMargins != null) {
@@ -74,6 +95,7 @@ class HeaderFooter {
     return XmlElement(XmlName("headerFooter"), attributes, children);
   }
 
+  /// Parses a [HeaderFooter] from an XML element.
   static HeaderFooter fromXmlElement(XmlElement headerFooterElement) {
     return HeaderFooter(
         alignWithMargins:
@@ -93,7 +115,9 @@ class HeaderFooter {
   }
 }
 
+/// Adds boolean parsing to [String].
 extension BoolParsing on String {
+  /// Parses `"true"`, `"1"` as `true` and `"false"`, `"0"` as `false`.
   bool parseBool() {
     var value = toLowerCase();
     if (value == 'true' || value == '1') {

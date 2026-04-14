@@ -1,9 +1,14 @@
 part of '../../excel_plus.dart';
 
+/// Represents a border on one side of a cell.
 class Border {
+  /// The line style of the border, or `null` for no border.
   final BorderStyle? borderStyle;
+
+  /// The border color as a hex string (e.g. `"FF000000"`), or `null`.
   final String? borderColorHex;
 
+  /// Creates a [Border] with an optional [borderStyle] and [borderColorHex].
   Border({BorderStyle? borderStyle, ExcelColor? borderColorHex})
       : borderStyle = borderStyle == BorderStyle.None ? null : borderStyle,
         borderColorHex = borderColorHex != null
@@ -69,6 +74,7 @@ class _BorderSet {
       );
 }
 
+/// Available border line styles in Excel.
 enum BorderStyle {
   None('none'),
   DashDot('dashDot'),
@@ -85,10 +91,14 @@ enum BorderStyle {
   Thick('thick'),
   Thin('thin');
 
+  /// The OOXML name for this border style.
   final String style;
   const BorderStyle(this.style);
 }
 
+/// Looks up a [BorderStyle] by its OOXML name.
+///
+/// Returns `null` if no matching style is found.
 BorderStyle? getBorderStyleByName(String name) {
   final lower = 'borderstyle.${name.toLowerCase()}';
   for (final e in BorderStyle.values) {

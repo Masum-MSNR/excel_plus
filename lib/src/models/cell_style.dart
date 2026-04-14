@@ -21,8 +21,11 @@ class CellStyle {
   Border _diagonalBorder;
   bool _diagonalBorderUp = false;
   bool _diagonalBorderDown = false;
+
+  /// The number format applied to this cell.
   NumFormat numberFormat;
 
+  /// Creates a [CellStyle] with the given formatting properties.
   CellStyle({
     ExcelColor fontColorHex = ExcelColor.black,
     ExcelColor backgroundColorHex = ExcelColor.none,
@@ -64,6 +67,7 @@ class CellStyle {
         _diagonalBorderUp = diagonalBorderUp,
         _diagonalBorderDown = diagonalBorderDown;
 
+  /// Returns a copy of this style with the specified properties replaced.
   CellStyle copyWith({
     ExcelColor? fontColorHexVal,
     ExcelColor? backgroundColorHexVal,

@@ -1,12 +1,18 @@
 part of '../../excel_plus.dart';
 
+/// Base type for all cell values in an Excel worksheet.
+///
+/// Each subclass represents a different data type that can be stored in a cell.
 sealed class CellValue {
   const CellValue();
 }
 
+/// A cell value containing a formula expression.
 class FormulaCellValue extends CellValue {
+  /// The formula string (e.g. `SUM(A1:A10)`).
   final String formula;
 
+  /// Creates a formula cell value from the given [formula] string.
   const FormulaCellValue(this.formula);
 
   @override
@@ -23,9 +29,12 @@ class FormulaCellValue extends CellValue {
   }
 }
 
+/// A cell value containing an integer.
 class IntCellValue extends CellValue {
+  /// The integer value.
   final int value;
 
+  /// Creates an integer cell value.
   const IntCellValue(this.value);
 
   @override
@@ -42,9 +51,12 @@ class IntCellValue extends CellValue {
   }
 }
 
+/// A cell value containing a double.
 class DoubleCellValue extends CellValue {
+  /// The double value.
   final double value;
 
+  /// Creates a double cell value.
   const DoubleCellValue(this.value);
 
   @override
@@ -61,11 +73,18 @@ class DoubleCellValue extends CellValue {
   }
 }
 
+/// A cell value containing a date (year, month, day).
 class DateCellValue extends CellValue {
+  /// The year component.
   final int year;
+
+  /// The month component (1–12).
   final int month;
+
+  /// The day component (1–31).
   final int day;
 
+  /// Creates a date cell value from [year], [month], and [day].
   const DateCellValue({
     required this.year,
     required this.month,
@@ -73,15 +92,18 @@ class DateCellValue extends CellValue {
   })  : assert(month <= 12 && month >= 1),
         assert(day <= 31 && day >= 1);
 
+  /// Creates a date cell value from a [DateTime].
   DateCellValue.fromDateTime(DateTime dt)
       : year = dt.year,
         month = dt.month,
         day = dt.day;
 
+  /// Converts to a local [DateTime].
   DateTime asDateTimeLocal() {
     return DateTime(year, month, day);
   }
 
+  /// Converts to a UTC [DateTime].
   DateTime asDateTimeUtc() {
     return DateTime.utc(year, month, day);
   }
@@ -103,10 +125,15 @@ class DateCellValue extends CellValue {
   }
 }
 
+/// A cell value containing text, optionally with rich-text formatting.
 class TextCellValue extends CellValue {
+  /// The text content as a [TextSpan].
   final TextSpan value;
 
+  /// Creates a plain text cell value.
   TextCellValue(String text) : value = TextSpan(text: text);
+
+  /// Creates a rich text cell value from a [TextSpan].
   TextCellValue.span(this.value);
 
   @override
@@ -123,9 +150,12 @@ class TextCellValue extends CellValue {
   }
 }
 
+/// A cell value containing a boolean.
 class BoolCellValue extends CellValue {
+  /// The boolean value.
   final bool value;
 
+  /// Creates a boolean cell value.
   const BoolCellValue(this.value);
 
   @override
@@ -142,13 +172,24 @@ class BoolCellValue extends CellValue {
   }
 }
 
+/// A cell value containing a time of day.
 class TimeCellValue extends CellValue {
+  /// Hours component.
   final int hour;
+
+  /// Minutes component (0–60).
   final int minute;
+
+  /// Seconds component (0–60).
   final int second;
+
+  /// Milliseconds component (0–1000).
   final int millisecond;
+
+  /// Microseconds component (0–1000).
   final int microsecond;
 
+  /// Creates a time cell value.
   const TimeCellValue({
     this.hour = 0,
     this.minute = 0,
@@ -168,6 +209,7 @@ class TimeCellValue extends CellValue {
     return TimeCellValue.fromDuration(duration);
   }
 
+  /// Creates a [TimeCellValue] from a [Duration].
   factory TimeCellValue.fromDuration(Duration duration) {
     final someUtcDate = DateTime.utc(0).add(duration);
     return TimeCellValue(
@@ -179,6 +221,7 @@ class TimeCellValue extends CellValue {
     );
   }
 
+  /// Creates a [TimeCellValue] by extracting the time from a [DateTime].
   TimeCellValue.fromTimeOfDateTime(DateTime dt)
       : hour = dt.hour,
         minute = dt.minute,
@@ -186,6 +229,7 @@ class TimeCellValue extends CellValue {
         millisecond = dt.millisecond,
         microsecond = dt.microsecond;
 
+  /// Converts this time value to a [Duration].
   Duration asDuration() {
     return Duration(
       hours: hour,
@@ -225,15 +269,31 @@ class TimeCellValue extends CellValue {
 /// Excel does not know if this is UTC or not. Use methods [asDateTimeLocal]
 /// or [asDateTimeUtc] to get the DateTime object you prefer.
 class DateTimeCellValue extends CellValue {
+  /// The year component.
   final int year;
+
+  /// The month component (1–12).
   final int month;
+
+  /// The day component (1–31).
   final int day;
+
+  /// The hour component (0–24).
   final int hour;
+
+  /// The minute component (0–60).
   final int minute;
+
+  /// The second component (0–60).
   final int second;
+
+  /// The millisecond component (0–1000).
   final int millisecond;
+
+  /// The microsecond component (0–1000).
   final int microsecond;
 
+  /// Creates a date-time cell value.
   const DateTimeCellValue({
     required this.year,
     required this.month,
@@ -251,6 +311,7 @@ class DateTimeCellValue extends CellValue {
         assert(millisecond <= 1000 && millisecond >= 0),
         assert(microsecond <= 1000 && microsecond >= 0);
 
+  /// Creates a [DateTimeCellValue] from a [DateTime].
   DateTimeCellValue.fromDateTime(DateTime date)
       : year = date.year,
         month = date.month,
@@ -261,11 +322,13 @@ class DateTimeCellValue extends CellValue {
         millisecond = date.millisecond,
         microsecond = date.microsecond;
 
+  /// Converts to a local [DateTime].
   DateTime asDateTimeLocal() {
     return DateTime(
         year, month, day, hour, minute, second, millisecond, microsecond);
   }
 
+  /// Converts to a UTC [DateTime].
   DateTime asDateTimeUtc() {
     return DateTime.utc(
         year, month, day, hour, minute, second, millisecond, microsecond);

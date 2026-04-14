@@ -1,5 +1,6 @@
 part of '../../excel_plus.dart';
 
+/// Represents a single worksheet within an Excel workbook.
 class Sheet extends _SheetBase with _SheetRowColumnMixin, _SheetMergeMixin {
   ///
   /// It will clone the object by changing the `this` reference of previous oldSheetObject and putting `new this` reference, with copying the values too

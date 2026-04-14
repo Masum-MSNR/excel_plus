@@ -1,5 +1,8 @@
 part of '../../excel_plus.dart';
 
+/// Represents a single cell's data within a [Sheet].
+///
+/// Contains the cell's value, style, and position information.
 class Data {
   CellStyle? _cellStyle;
   CellValue? _value;
@@ -28,14 +31,18 @@ class Data {
         _rowIndex = row,
         _columnIndex = column;
 
+  /// Creates an empty [Data] cell at the given [row] and [column] in [sheet].
   static Data newData(Sheet sheet, int row, int column) {
     return Data._(sheet, row, column);
   }
 
+  /// The 0-based row index of this cell.
   int get rowIndex => _rowIndex;
 
+  /// The 0-based column index of this cell.
   int get columnIndex => _columnIndex;
 
+  /// The name of the sheet containing this cell.
   String get sheetName => _sheet.sheetName;
 
   /// returns the string based cellId as A1, A2 or Z5
@@ -49,6 +56,7 @@ class Data {
     _sheet.updateCell(cellIndex, FormulaCellValue(formula));
   }
 
+  /// Sets the cell's value and updates the sheet.
   set value(CellValue? val) {
     _sheet.updateCell(cellIndex, val);
   }

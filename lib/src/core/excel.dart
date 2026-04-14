@@ -74,10 +74,12 @@ class Excel {
     parser._startParsing();
   }
 
+  /// Creates a new blank Excel workbook with a default sheet.
   factory Excel.createExcel() {
     return Excel.decodeBytes(Base64Decoder().convert(_newSheet));
   }
 
+  /// Decodes an `.xlsx` file from a byte list.
   factory Excel.decodeBytes(List<int> data) {
     final Archive archive;
     try {
@@ -89,6 +91,7 @@ class Excel {
     return _newExcel(archive);
   }
 
+  /// Decodes an `.xlsx` file from an [InputStream].
   factory Excel.decodeBuffer(InputStream input) {
     return _newExcel(ZipDecoder().decodeStream(input));
   }

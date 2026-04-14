@@ -66,12 +66,14 @@ class _SharedStringEntry {
   }
 }
 
+/// Represents a shared string entry in the xlsx shared string table.
 class SharedString {
   XmlElement? _node;
   final String _cachedValue;
   final bool _isRichText;
   late final int _hashCode = _cachedValue.hashCode;
 
+  /// Creates a [SharedString] from an XML element.
   SharedString({required XmlElement node})
       : _node = node,
         _cachedValue = _extractStringValue(node),
@@ -89,6 +91,7 @@ class SharedString {
     return _cachedValue;
   }
 
+  /// The plain string value of this shared string.
   String get stringValue => _cachedValue;
 
   /// Produces XML string for this shared string without DOM allocation.
@@ -99,6 +102,7 @@ class SharedString {
     return '<si><t xml:space="preserve">${_escapeXml(_cachedValue)}</t></si>';
   }
 
+  /// Returns or lazily builds the XML element for this shared string.
   XmlElement get node {
     _node ??= XmlElement(XmlName('si'), [], [
       XmlElement(XmlName('t'),
@@ -108,6 +112,7 @@ class SharedString {
     return _node!;
   }
 
+  /// Parses the shared string into a [TextSpan] tree for rich text access.
   TextSpan get textSpan {
     if (_node == null) {
       return TextSpan(text: _cachedValue);
@@ -219,11 +224,18 @@ class SharedString {
   }
 }
 
+/// A span of optionally styled text, similar to Flutter's TextSpan.
 class TextSpan {
+  /// The plain text content of this span.
   final String? text;
+
+  /// Child spans for rich text with mixed styling.
   final List<TextSpan>? children;
+
+  /// The cell style applied to this span.
   final CellStyle? style;
 
+  /// Creates a [TextSpan] with optional [text], [children], and [style].
   const TextSpan({this.children, this.text, this.style});
 
   @override

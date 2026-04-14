@@ -311,16 +311,20 @@ class _SheetBase {
     return _maxColumns;
   }
 
+  /// The header and footer settings for this sheet.
   HeaderFooter? get headerFooter {
     return _headerFooter;
   }
 
+  /// Sets the header and footer for this sheet.
   set headerFooter(HeaderFooter? headerFooter) {
     _headerFooter = headerFooter;
   }
 
+  /// The default row height, or `null` if not set.
   double? get defaultRowHeight => _defaultRowHeight;
 
+  /// The default column width, or `null` if not set.
   double? get defaultColumnWidth => _defaultColumnWidth;
 
   /// returns map of auto fit columns
