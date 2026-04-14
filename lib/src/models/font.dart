@@ -2,7 +2,7 @@ part of '../../excel_plus.dart';
 
 /// Styling class for cells
 // ignore: must_be_immutable
-class _FontStyle extends Equatable {
+class _FontStyle {
   ExcelColor? _fontColorHex = ExcelColor.black;
   String? _fontFamily;
   FontScheme _fontScheme = FontScheme.Unset;
@@ -114,7 +114,19 @@ class _FontStyle extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _FontStyle &&
+          other._bold == _bold &&
+          other._italic == _italic &&
+          other._fontSize == _fontSize &&
+          other._underline == _underline &&
+          other._fontFamily == _fontFamily &&
+          other._fontColorHex == _fontColorHex &&
+          other._fontScheme == _fontScheme;
+
+  @override
+  int get hashCode => Object.hash(
         _bold,
         _italic,
         _fontSize,
@@ -122,7 +134,7 @@ class _FontStyle extends Equatable {
         _fontFamily,
         _fontColorHex,
         _fontScheme,
-      ];
+      );
 }
 
 enum FontFamily {

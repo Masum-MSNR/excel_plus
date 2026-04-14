@@ -266,7 +266,7 @@ class TextSpan {
     return other is TextSpan &&
         other.text == text &&
         other.style == style &&
-        ListEquality().equals(other.children, children);
+        _listEquals(other.children, children);
   }
 
   @override

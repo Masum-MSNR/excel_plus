@@ -2,7 +2,7 @@ part of '../../excel_plus.dart';
 
 /// Styling class for cells
 // ignore: must_be_immutable
-class CellStyle extends Equatable {
+class CellStyle {
   String _fontColorHex = ExcelColor.black.colorHex;
   String _backgroundColorHex = ExcelColor.none.colorHex;
   String? _fontFamily;
@@ -348,7 +348,32 @@ class CellStyle extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CellStyle &&
+          other._bold == _bold &&
+          other._rotation == _rotation &&
+          other._italic == _italic &&
+          other._underline == _underline &&
+          other._fontSize == _fontSize &&
+          other._fontFamily == _fontFamily &&
+          other._fontScheme == _fontScheme &&
+          other._textWrapping == _textWrapping &&
+          other._verticalAlign == _verticalAlign &&
+          other._horizontalAlign == _horizontalAlign &&
+          other._fontColorHex == _fontColorHex &&
+          other._backgroundColorHex == _backgroundColorHex &&
+          other._leftBorder == _leftBorder &&
+          other._rightBorder == _rightBorder &&
+          other._topBorder == _topBorder &&
+          other._bottomBorder == _bottomBorder &&
+          other._diagonalBorder == _diagonalBorder &&
+          other._diagonalBorderUp == _diagonalBorderUp &&
+          other._diagonalBorderDown == _diagonalBorderDown &&
+          other.numberFormat == numberFormat;
+
+  @override
+  int get hashCode => Object.hash(
         _bold,
         _rotation,
         _italic,
@@ -369,5 +394,5 @@ class CellStyle extends Equatable {
         _diagonalBorderUp,
         _diagonalBorderDown,
         numberFormat,
-      ];
+      );
 }

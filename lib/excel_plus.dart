@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 import 'package:archive/archive.dart';
-import 'package:collection/collection.dart';
-import 'package:equatable/equatable.dart';
 import 'package:xml/xml.dart';
 import 'package:xml/xml_events.dart';
 import 'src/platform/save_stub.dart'

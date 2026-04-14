@@ -1,6 +1,6 @@
 part of '../../excel_plus.dart';
 
-class CellIndex extends Equatable {
+class CellIndex {
   CellIndex._({required this.columnIndex, required this.rowIndex});
 
   ///
@@ -36,5 +36,12 @@ class CellIndex extends Equatable {
   final int columnIndex;
 
   @override
-  List<Object?> get props => [rowIndex, columnIndex];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CellIndex &&
+          other.rowIndex == rowIndex &&
+          other.columnIndex == columnIndex;
+
+  @override
+  int get hashCode => Object.hash(rowIndex, columnIndex);
 }

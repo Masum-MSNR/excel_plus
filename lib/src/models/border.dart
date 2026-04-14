@@ -1,6 +1,6 @@
 part of '../../excel_plus.dart';
 
-class Border extends Equatable {
+class Border {
   final BorderStyle? borderStyle;
   final String? borderColorHex;
 
@@ -16,13 +16,17 @@ class Border extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
-        borderStyle,
-        borderColorHex,
-      ];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Border &&
+          other.borderStyle == borderStyle &&
+          other.borderColorHex == borderColorHex;
+
+  @override
+  int get hashCode => Object.hash(borderStyle, borderColorHex);
 }
 
-class _BorderSet extends Equatable {
+class _BorderSet {
   final Border leftBorder;
   final Border rightBorder;
   final Border topBorder;
@@ -62,7 +66,19 @@ class _BorderSet extends Equatable {
   }
 
   @override
-  List<Object?> get props => [
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _BorderSet &&
+          other.leftBorder == leftBorder &&
+          other.rightBorder == rightBorder &&
+          other.topBorder == topBorder &&
+          other.bottomBorder == bottomBorder &&
+          other.diagonalBorder == diagonalBorder &&
+          other.diagonalBorderUp == diagonalBorderUp &&
+          other.diagonalBorderDown == diagonalBorderDown;
+
+  @override
+  int get hashCode => Object.hash(
         leftBorder,
         rightBorder,
         topBorder,
@@ -70,7 +86,7 @@ class _BorderSet extends Equatable {
         diagonalBorder,
         diagonalBorderUp,
         diagonalBorderDown,
-      ];
+      );
 }
 
 enum BorderStyle {
@@ -93,6 +109,10 @@ enum BorderStyle {
   const BorderStyle(this.style);
 }
 
-BorderStyle? getBorderStyleByName(String name) =>
-    BorderStyle.values.firstWhereOrNull((e) =>
-        e.toString().toLowerCase() == 'borderstyle.${name.toLowerCase()}');
+BorderStyle? getBorderStyleByName(String name) {
+  final lower = 'borderstyle.${name.toLowerCase()}';
+  for (final e in BorderStyle.values) {
+    if (e.toString().toLowerCase() == lower) return e;
+  }
+  return null;
+}

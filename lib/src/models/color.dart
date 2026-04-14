@@ -1,7 +1,7 @@
 part of '../../excel_plus.dart';
 
 /// Copying from Flutter Material Color
-class ExcelColor extends Equatable {
+class ExcelColor {
   const ExcelColor._(this._color, [this._name, this._type]);
 
   final String _color;
@@ -810,13 +810,17 @@ class ExcelColor extends Equatable {
   static Map<String, ExcelColor> get valuesAsMap =>
       values.asMap().map((_, v) => MapEntry(v.colorHex, v));
   @override
-  List<Object?> get props => [
-        _name,
-        _color,
-        _type,
-        colorHex,
-        colorInt,
-      ];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ExcelColor &&
+          other._name == _name &&
+          other._color == _color &&
+          other._type == _type &&
+          other.colorHex == colorHex &&
+          other.colorInt == colorInt;
+
+  @override
+  int get hashCode => Object.hash(_name, _color, _type, colorHex, colorInt);
 }
 
 enum ColorType {

@@ -1,7 +1,7 @@
 part of '../../excel_plus.dart';
 
 // For Spanning the columns and rows
-class _Span extends Equatable {
+class _Span {
   final int rowSpanStart;
   final int columnSpanStart;
   final int rowSpanEnd;
@@ -23,10 +23,15 @@ class _Span extends Equatable {
         columnSpanEnd = end.columnIndex;
 
   @override
-  List<Object?> get props => [
-        rowSpanStart,
-        columnSpanStart,
-        rowSpanEnd,
-        columnSpanEnd,
-      ];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _Span &&
+          other.rowSpanStart == rowSpanStart &&
+          other.columnSpanStart == columnSpanStart &&
+          other.rowSpanEnd == rowSpanEnd &&
+          other.columnSpanEnd == columnSpanEnd;
+
+  @override
+  int get hashCode =>
+      Object.hash(rowSpanStart, columnSpanStart, rowSpanEnd, columnSpanEnd);
 }

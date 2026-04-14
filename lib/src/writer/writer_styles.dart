@@ -306,7 +306,8 @@ mixin _WriterStylesMixin on _WriterBase {
           return MapEntry<int, CustomNumFormat>(e.key, format);
         })
         .nonNulls
-        .sorted((a, b) => a.key.compareTo(b.key));
+        .toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
 
     if (customNumberFormats.isNotEmpty) {
       var numFmtsElement = styleSheet
@@ -331,9 +332,12 @@ mixin _WriterStylesMixin on _WriterBase {
         final formatCode = numFormat.value.formatCode;
         var numFmtElement = numFmtsElement.children
             .whereType<XmlElement>()
-            .firstWhereOrNull((node) =>
-                node.name.local == 'numFmt' &&
-                node.getAttribute('numFmtId') == numFmtIdString);
+            .cast<XmlElement?>()
+            .firstWhere(
+                (node) =>
+                    node!.name.local == 'numFmt' &&
+                    node.getAttribute('numFmtId') == numFmtIdString,
+                orElse: () => null);
         if (numFmtElement == null) {
           numFmtElement = XmlElement(
               XmlName('numFmt'),
